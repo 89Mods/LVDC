@@ -1,0 +1,75 @@
+AS2650-2 on FP
+
+Required backplane signals
+
+Bus (26)
+INSTR (13)
+NC
+CLK
+RST
+VCC
+GND
+
+Total: 44
+
+On dedicated ribbon connectors:
+From Register to Memory:
+INSTR_SECTOR (4)
+INSTR_MODULE (3)
+INSTR_ADD (8)
+DATA_SECTOR (4)
+DATA_MODULE (3)
+Total: 22
+
+From Registers to ALU:
+Accum (26)
+
+Total: 26
+
+Ctrl to ALU:
+IS_RSU
+ALU_R
+ALU_ISS
+
+Total: 3
+
+Ctrl to Registers:
+ACCW
+R_A
+CDS
+TRA
+INCPC
+R_H
+HOPW
+H_CYC_1
+CSYLLABLE
+ACCUM_ZERO
+ACCUM_NEGATIVE
+
+Total: 11
+
+Ctrl to Memory:
+FETCH_CYC
+MEM_WR
+MEM_RD
+irupt
+EXM_EXEC_I
+EXM_SECTOR (3)
+RESIDUAL_I
+IS_EXM_I
+PQ_ADDR
+HOP_INSTE
+
+Total: 12
+
+Ctrl to muldiv:
+OUTPUT_PQ
+MUL_RST
+LDX
+LDY
+IS_DIV
+LDZ
+START
+IS_ACTIVE
+
+Total: 8

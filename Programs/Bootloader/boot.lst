@@ -1,0 +1,131 @@
+ AS V1.42 Beta [Bld 273] - Source File boot.asm - Page 1 - 06.03.2025 19:32:10
+
+
+    1/   0 : =$0                        io_write_base equ 0
+    2/   0 : =$100                      io_read_base equ 1<<8
+    3/   0 :                            
+    4/   0 : =$180                      radio_read equ io_read_base + (%1000 << 4)
+    5/   0 : =$1E0                      status_read equ io_read_base + (%1110 << 4)
+    6/   0 : =$1F0                      spi_din equ io_read_base + (%1111 << 4)
+    7/   0 : =$50                       gpio_out equ io_write_base + (%0101 << 4)
+    8/   0 : =$150                      gpio_in equ io_read_base + (%0101 << 4)
+    9/   0 :                            
+   10/   0 : =$20                       cpld_regs_base_write equ io_write_base + (%0010 << 4)
+   11/   0 : =$20                       r1_lo equ cpld_regs_base_write + (%0000 << 4)
+   12/   0 : =$30                       r1_hi equ cpld_regs_base_write + (%0001 << 4)
+   13/   0 : =$60                       r2_lo equ cpld_regs_base_write + (%0100 << 4)
+   14/   0 : =$70                       r2_hi equ cpld_regs_base_write + (%0101 << 4)
+   15/   0 : =$A0                       spi_dout equ cpld_regs_base_write + (%1000 << 4)
+   16/   0 : =$B0                       radio_txw equ cpld_regs_base_write + (%1001 << 4)
+   17/   0 : =$E0                       settings_reg equ cpld_regs_base_write + (%1100 << 4)
+   18/   0 :                            
+   19/   0 : =$100                      spi_flash equ 1<<8
+   20/   0 : =$200                      spi_leds_left equ 2<<8
+   21/   0 : =$400                      spi_leds_right equ 4<<8
+   22/   0 :                            
+   23/   0 : =$1                        r_clr_keyrupt equ 1
+   24/   0 : =$2                        r_clr_trupt equ 2
+   25/   0 : =$4                        r_clr_urupt equ 4
+   26/   0 : =$8                        r_chg_timer equ 8
+   27/   0 : =$10                       r_timer_en equ 16
+   28/   0 : =$80                       r_chg_mm equ 128
+   29/   0 :                            ; MM value in bits 8 - 15
+   30/   0 :                            
+   31/   0 :                            ; Status register makeup:
+   32/   0 :                            ; - Undefined
+   33/   0 :                            ; .
+   34/   0 :                            ; .
+   35/   0 :                            ; .
+   36/   0 :                            ; .
+   37/   0 :                            ; .
+   38/   0 :                            ; .
+   39/   0 :                            ; .
+   40/   0 :                            ; .
+   41/   0 :                            ; .
+   42/   0 :                            ; .
+   43/   0 :                            ; .
+   44/   0 :                            ; .
+   45/   0 :                            ; - urupt
+   46/   0 :                            ; - keyrupt
+   47/   0 :                            ; - trupt
+   48/   0 :                            
+   49/   0 :                            ; Settings on GPIO output port
+   50/   0 : =$1                        gr_sign_r2 equ 1
+   51/   0 : =$2                        gr_lamp_temp equ 2
+   52/   0 : =$4                        gr_sign_r1 equ 4
+   53/   0 : =$8                        gr_lamp_restart equ 8
+   54/   0 : =$10                       gr_lamp_opr_err equ 16
+   55/   0 : =$20                       gr_lamp_comp_acty equ 32
+   56/   0 : =$40                       gr_int_inhibit equ 64
+   57/   0 : =$80                       gr_flash_csb equ 128
+   58/   0 :                            
+   59/   0 :                            start:
+   60/   0 : 00EF                       	CLA settings_reset
+ AS V1.42 Beta [Bld 273] - Source File boot.asm - Page 2 - 06.03.2025 19:32:10
+
+
+   61/   1 : 00EA                       	PIO settings_reset
+   62/   2 : 010F                       	CLA initial_gpio
+   63/   3 : 0A0A                       	PIO gpio_out
+   64/   4 : 000A                       	PIO io_write_base
+   65/   5 :                            error_halt:
+   66/   5 : 082E                       	CDSD 0,4
+   67/   6 : 00A8                       	TRA error_halt
+   68/   7 :                            
+   69/   7 :                            settings_reset:
+   70/   7 : 000F                       	dw r_clr_keyrupt + r_clr_trupt + r_chg_timer + r_clr_urupt
+   71/   8 :                            initial_gpio:
+   72/   8 : 00E8                       	dw gr_lamp_restart + gr_lamp_comp_acty + gr_int_inhibit + gr_flash_csb
+   73/   9 :                            
+ AS V1.42 Beta [Bld 273] - Source File boot.asm - Page 3 - 06.03.2025 19:32:10
+
+
+  Symbol Table (* = unused):
+  --------------------------
+
+*ARCHITECTURE :                                      "x86_64-unknown-linux" - |
+*CASESENSITIVE :                  0 - | *CONSTPI :        3.141592653589793 - |
+ CPLD_REGS_BASE_WRITE :          20 - | *DATE :                "06.03.2025" - |
+ ERROR_HALT :                     5 C | *FALSE :                          0 - |
+*GPIO_IN :                      150 - |  GPIO_OUT :                      50 - |
+ GR_FLASH_CSB :                  80 - |  GR_INT_INHIBIT :                40 - |
+ GR_LAMP_COMP_ACTY :             20 - | *GR_LAMP_OPR_ERR :               10 - |
+ GR_LAMP_RESTART :                8 - | *GR_LAMP_TEMP :                   2 - |
+*GR_SIGN_R1 :                     4 - | *GR_SIGN_R2 :                     1 - |
+*HAS64 :                          1 - |  INITIAL_GPIO :                   8 C |
+ IO_READ_BASE :                 100 - |  IO_WRITE_BASE :                  0 - |
+*LISTON :                         1 - | *MACEXP :                         7 - |
+*MOMCPU :                         0 - | *MOMCPUNAME :                "LVDC" - |
+*NESTMAX :                      100 - | *R1_HI :                         30 - |
+*R1_LO :                         20 - | *R2_HI :                         70 - |
+*R2_LO :                         60 - | *RADIO_READ :                   180 - |
+*RADIO_TXW :                     B0 - | *RELAXED :                        0 - |
+*R_CHG_MM :                      80 - |  R_CHG_TIMER :                    8 - |
+ R_CLR_KEYRUPT :                  1 - |  R_CLR_TRUPT :                    2 - |
+ R_CLR_URUPT :                    4 - | *R_TIMER_EN :                    10 - |
+*SETTINGS_REG :                  E0 - |  SETTINGS_RESET :                 7 C |
+*SPI_DIN :                      1F0 - | *SPI_DOUT :                      A0 - |
+*SPI_FLASH :                    100 - | *SPI_LEDS_LEFT :                200 - |
+*SPI_LEDS_RIGHT :               400 - | *START :                          0 C |
+*STATUS_READ :                  1E0 - | *TIME :                  "19:32:10" - |
+*TRUE :                           1 - | *VERSION :                     142F - |
+
+     51 symbols
+     36 unused symbols
+
+ AS V1.42 Beta [Bld 273] - Source File boot.asm - Page 4 - 06.03.2025 19:32:10
+
+
+  Code Pages:
+  ----------
+
+STANDARD (0 changed characters)
+
+1 code page
+
+0.01 seconds assembly time
+
+     73 lines source file
+      2 passes
+      0 errors
+      0 warnings

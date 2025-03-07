@@ -1,0 +1,7 @@
+*.out
+*.p
+*.bin
+*.hex
+KiCad/*/*-backups
+Bench/obj_dir/
+behavioral/obj_dir/
