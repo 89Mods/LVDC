@@ -423,7 +423,7 @@ module Registers
 
    Registers_U24 _U24(HOPW, NEXT_HOP_DATA_SM, DB16, Net__U18_D0_, NEXT_HOP_DM0,
     DB17, Net__U18_D1_, Net__U18_D2_, DB18, NEXT_HOP_DM1, Net__U18_D3_, DB19,
-    NEXT_HOP_DM2, nRST);
+    NEXT_HOP_DM2, RST);
 
    Registers_U25 _U25(HOPW, NEXT_HOP_DS0, DB20, Net__U18_D4_, NEXT_HOP_DS1,
     DB21, Net__U18_D5_, Net__U18_D6_, DB22, NEXT_HOP_DS2, Net__U18_D7_, DB23,

@@ -2,7 +2,8 @@
 
 module virtual_backplane(
 	input clk,
-	input irq
+	input irq,
+	output booted
 );
 
 wire rstb_wire;
@@ -178,7 +179,8 @@ io_emulation IO(
 	.rstb(rstb),
 	.clockin(clk),
 	.nIOR(nIOR),
-	.nIOW(nIOW)
+	.nIOW(nIOW),
+	.booted(booted)
 );
 
 endmodule

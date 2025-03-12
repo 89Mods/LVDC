@@ -12,7 +12,7 @@ bool clock_state = false;
 void advance() {
 	int total = 0;
 	while(1) {
-		int diff = 500 - total;
+		int diff = 250 - total;
 		if(diff <= 0) break;
 		if(!top.eventsPending()) {
 			Verilated::timeInc(diff);
@@ -22,7 +22,7 @@ void advance() {
 			break;
 		}
 		int nextSlot = top.nextTimeSlot() - total_time;
-		if(nextSlot + total >= 500) {
+		if(nextSlot + total >= 250) {
 			Verilated::timeInc(diff);
 			total_time += diff;
 			total += diff;
@@ -46,7 +46,7 @@ int main(int argc, char** argv, char** env) {
 	top.clk = 0;
 	top.irq = 0;
 	unsigned long counter = 0;
-	while(!Verilated::gotFinish() && counter < 2000) {
+	while(!Verilated::gotFinish() && counter < 1024000) {
 		top.clk = !top.clk;
 		advance();
 		counter++;

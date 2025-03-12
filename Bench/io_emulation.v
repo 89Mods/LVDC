@@ -7,7 +7,8 @@ module io_emulation(
 	output rstb,
 	input clockin,
 	input nIOR,
-	input nIOW
+	input nIOW,
+	output reg booted = 0
 );
 
 reg V3_rstb;
@@ -127,6 +128,12 @@ ttl_74hct574 U5(
 	.OEb(1'b0)
 );
 
+always @(posedge LAMP_RESTART) $display("RESTART");
+always @(posedge LAMP_OPR_ERR) $display("OPERATOR ERROR");
+always @(posedge INT_INHIBIT) $display("INTERRUPT INHIBIT SET");
+always @(negedge INT_INHIBIT) $display("INTERRUPT INHIBIT CLEAR");
+always @(negedge LAMP_RESTART) booted <= 1;
+
 ttl_74hct574 U30(
 	.D(DB[15:8]),
 	.Q(),
@@ -136,6 +143,9 @@ ttl_74hct574 U30(
 
 wire V3_INTERRUPT;
 wire LED;
+wire SDO;
+tri0 SDI;
+wire SCK_FLASH;
 awawawawa CPLD(
 	.IORb(V3_nIOR),
 	.IOWb(V3_nIOW),
@@ -157,9 +167,9 @@ awawawawa CPLD(
 	.R1_SEGS(),
 	.R2_SEGS(),
 	
-	.SDO(),
-	.SDI(1'b0),
-	.SCK_FLASH(),
+	.SDO(SDO),
+	.SDI(SDI),
+	.SCK_FLASH(SCK_FLASH),
 	.SCK_LED1(),
 	.SCK_LED2(),
 	
@@ -168,6 +178,17 @@ awawawawa CPLD(
 	.LED(LED),
 	
 	.clk(V3_clockin)
+);
+
+tri1 io2;
+tri1 io3;
+spiflash flash(
+	.csb(FLASH_CS),
+	.clk(SCK_FLASH),
+	.io0(SDO),
+	.io1(SDI),
+	.io2(io2),
+	.io3(io3)
 );
 
 endmodule

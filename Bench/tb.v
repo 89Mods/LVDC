@@ -6,9 +6,11 @@ module tb(
 	input irq
 );
 
+wire booted;
 virtual_backplane computer(
 	.clk(clk),
-	.irq(irq)
+	.irq(irq),
+	.booted(booted)
 );
 
 initial begin
@@ -16,6 +18,10 @@ initial begin
 	$readmemh("../microcode_verilog_hi.txt", computer.Control._U13.U13.memory, 0, 2047);
 	$readmemh("../rom_lo.txt", computer.Memory._U16.U16.memory, 0, 2047);
 	$readmemh("../rom_hi.txt", computer.Memory._U17.U17.memory, 0, 2047);
+end
+
+always @(posedge booted) begin
+	$display("Boot complete");
 `ifdef TRACE_ON
 	$dumpfile("tb.vcd");
 	$dumpvars(0, computer);

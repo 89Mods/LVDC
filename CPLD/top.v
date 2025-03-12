@@ -41,10 +41,10 @@ assign BDIR = (!IORb && I == 4'b1010) || status_read || radio_read;
 assign bus = BDIR ? (status_read ? {13'hxx, radio_int_source, key_int_state, timer_int_state} : (radio_read ? radio_word : spi_inbuff)) : 16'hzzzz;
 
 reg GPIO_LOAD_edge = 0;
-wire GPIO_LOAD_condition = !IOWb && I[2] && I[0];
+wire GPIO_LOAD_condition = !IOWb && I == 4'b0101;
 assign GPIO_LOAD = !GPIO_LOAD_edge && GPIO_LOAD_condition;
 
-assign GPIO_READb = !(!IORb && I[2] && I[0]);
+assign GPIO_READb = !(!IORb && I == 4'b0101);
 
 reg SCK = 0;
 reg [7:0] spi_outbuff = 0;

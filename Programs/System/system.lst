@@ -1,0 +1,128 @@
+ AS V1.42 Beta [Bld 273] - Source File system.asm - Page 1 - 12.03.2025 20:56:26
+
+
+    1/   0 : =$0                        io_write_base equ 0
+    2/   0 : =$100                      io_read_base equ 1<<8
+    3/   0 :                            
+    4/   0 : =$108                      radio_read equ io_read_base + (%1000)
+    5/   0 : =$10E                      status_read equ io_read_base + (%1110)
+    6/   0 : =$10A                      spi_din equ io_read_base + (%1010)
+    7/   0 : =$5                        gpio_out equ io_write_base + (%0101)
+    8/   0 : =$105                      gpio_in equ io_read_base + (%0101)
+    9/   0 :                            
+   10/   0 : =$2                        cpld_regs_base_write equ io_write_base + (%0010)
+   11/   0 : =$2                        r1_lo equ cpld_regs_base_write + (%0000)
+   12/   0 : =$3                        r1_hi equ cpld_regs_base_write + (%0001)
+   13/   0 : =$6                        r2_lo equ cpld_regs_base_write + (%0100)
+   14/   0 : =$7                        r2_hi equ cpld_regs_base_write + (%0101)
+   15/   0 : =$A                        spi_dout equ cpld_regs_base_write + (%1000)
+   16/   0 : =$B                        radio_txw equ cpld_regs_base_write + (%1001)
+   17/   0 : =$E                        settings_reg equ cpld_regs_base_write + (%1100)
+   18/   0 : =$F                        sid_base equ cpld_regs_base_write + (%1101)
+   19/   0 :                            
+   20/   0 :                            ; When writing to SID, bits 0 - 7 of the dataword is the data
+   21/   0 :                            ; and bits 8 - 13 is the address
+   22/   0 :                            
+   23/   0 : =$100                      spi_flash equ 1<<8
+   24/   0 : =$200                      spi_leds_left equ 2<<8
+   25/   0 : =$400                      spi_leds_right equ 4<<8
+   26/   0 :                            
+   27/   0 : =$1                        r_clr_keyrupt equ 1
+   28/   0 : =$2                        r_clr_trupt equ 2
+   29/   0 : =$4                        r_clr_urupt equ 4
+   30/   0 : =$8                        r_chg_timer equ 8
+   31/   0 : =$10                       r_timer_en equ 16
+   32/   0 : =$80                       r_chg_mm equ 128
+   33/   0 :                            ; MM value in bits 8 - 15
+   34/   0 :                            
+   35/   0 :                            ; Status register makeup:
+   36/   0 :                            ; - Undefined
+   37/   0 :                            ; .
+   38/   0 :                            ; .
+   39/   0 :                            ; .
+   40/   0 :                            ; .
+   41/   0 :                            ; .
+   42/   0 :                            ; .
+   43/   0 :                            ; .
+   44/   0 :                            ; .
+   45/   0 :                            ; .
+   46/   0 :                            ; .
+   47/   0 :                            ; .
+   48/   0 :                            ; .
+   49/   0 :                            ; - urupt
+   50/   0 :                            ; - keyrupt
+   51/   0 :                            ; - trupt
+   52/   0 :                            
+   53/   0 :                            ; Settings on GPIO output port
+   54/   0 : =$1                        gr_sign_r2 equ 1
+   55/   0 : =$2                        gr_lamp_temp equ 2
+   56/   0 : =$4                        gr_sign_r1 equ 4
+   57/   0 : =$8                        gr_lamp_restart equ 8
+   58/   0 : =$10                       gr_lamp_opr_err equ 16
+   59/   0 : =$20                       gr_lamp_comp_acty equ 32
+   60/   0 : =$40                       gr_int_inhibit equ 64
+ AS V1.42 Beta [Bld 273] - Source File system.asm - Page 2 - 12.03.2025 20:56:26
+
+
+   61/   0 : =$80                       gr_flash_csb equ 128
+   62/   0 :                            	org 0
+   63/   0 :                            start:
+   64/   0 : 0000082E                   	CDSD 0,4
+   65/   1 : 0000008F                   	CLA initial_gpio
+   66/   2 : 000000AA                   	PIO gpio_out
+   67/   3 : 00000008                   	TRA start
+   68/   4 :                            initial_gpio:
+   69/   4 : 000000E0                   	dd gr_lamp_comp_acty + gr_int_inhibit + gr_flash_csb
+   70/   5 :                            
+ AS V1.42 Beta [Bld 273] - Source File system.asm - Page 3 - 12.03.2025 20:56:26
+
+
+  Symbol Table (* = unused):
+  --------------------------
+
+*ARCHITECTURE :                                      "x86_64-unknown-linux" - |
+*CASESENSITIVE :                  0 - | *CONSTPI :        3.141592653589793 - |
+ CPLD_REGS_BASE_WRITE :           2 - | *DATE :                "12.03.2025" - |
+*FALSE :                          0 - | *GPIO_IN :                      105 - |
+ GPIO_OUT :                       5 - |  GR_FLASH_CSB :                  80 - |
+ GR_INT_INHIBIT :                40 - |  GR_LAMP_COMP_ACTY :             20 - |
+*GR_LAMP_OPR_ERR :               10 - | *GR_LAMP_RESTART :                8 - |
+*GR_LAMP_TEMP :                   2 - | *GR_SIGN_R1 :                     4 - |
+*GR_SIGN_R2 :                     1 - | *HAS64 :                          1 - |
+ INITIAL_GPIO :                   4 C |  IO_READ_BASE :                 100 - |
+ IO_WRITE_BASE :                  0 - | *LISTON :                         1 - |
+*MACEXP :                         7 - | *MOMCPU :                         0 - |
+*MOMCPUNAME :                "LVDC" - | *NESTMAX :                      100 - |
+*R1_HI :                          3 - | *R1_LO :                          2 - |
+*R2_HI :                          7 - | *R2_LO :                          6 - |
+*RADIO_READ :                   108 - | *RADIO_TXW :                      B - |
+*RELAXED :                        0 - | *R_CHG_MM :                      80 - |
+*R_CHG_TIMER :                    8 - | *R_CLR_KEYRUPT :                  1 - |
+*R_CLR_TRUPT :                    2 - | *R_CLR_URUPT :                    4 - |
+*R_TIMER_EN :                    10 - | *SETTINGS_REG :                   E - |
+*SID_BASE :                       F - | *SPI_DIN :                      10A - |
+*SPI_DOUT :                       A - | *SPI_FLASH :                    100 - |
+*SPI_LEDS_LEFT :                200 - | *SPI_LEDS_RIGHT :               400 - |
+ START :                          0 C | *STATUS_READ :                  10E - |
+*TIME :                  "20:56:26" - | *TRUE :                           1 - |
+*VERSION :                     142F - |
+
+     50 symbols
+     41 unused symbols
+
+ AS V1.42 Beta [Bld 273] - Source File system.asm - Page 4 - 12.03.2025 20:56:26
+
+
+  Code Pages:
+  ----------
+
+STANDARD (0 changed characters)
+
+1 code page
+
+0.00 seconds assembly time
+
+     70 lines source file
+      2 passes
+      0 errors
+      0 warnings

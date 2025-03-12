@@ -1,42 +1,42 @@
- AS V1.42 Beta [Bld 273] - Source File boot.asm - Page 1 - 06.03.2025 19:32:10
+ AS V1.42 Beta [Bld 273] - Source File boot.asm - Page 1 - 12.03.2025 20:53:21
 
 
     1/   0 : =$0                        io_write_base equ 0
     2/   0 : =$100                      io_read_base equ 1<<8
     3/   0 :                            
-    4/   0 : =$180                      radio_read equ io_read_base + (%1000 << 4)
-    5/   0 : =$1E0                      status_read equ io_read_base + (%1110 << 4)
-    6/   0 : =$1F0                      spi_din equ io_read_base + (%1111 << 4)
-    7/   0 : =$50                       gpio_out equ io_write_base + (%0101 << 4)
-    8/   0 : =$150                      gpio_in equ io_read_base + (%0101 << 4)
+    4/   0 : =$108                      radio_read equ io_read_base + (%1000)
+    5/   0 : =$10E                      status_read equ io_read_base + (%1110)
+    6/   0 : =$10A                      spi_din equ io_read_base + (%1010)
+    7/   0 : =$5                        gpio_out equ io_write_base + (%0101)
+    8/   0 : =$105                      gpio_in equ io_read_base + (%0101)
     9/   0 :                            
-   10/   0 : =$20                       cpld_regs_base_write equ io_write_base + (%0010 << 4)
-   11/   0 : =$20                       r1_lo equ cpld_regs_base_write + (%0000 << 4)
-   12/   0 : =$30                       r1_hi equ cpld_regs_base_write + (%0001 << 4)
-   13/   0 : =$60                       r2_lo equ cpld_regs_base_write + (%0100 << 4)
-   14/   0 : =$70                       r2_hi equ cpld_regs_base_write + (%0101 << 4)
-   15/   0 : =$A0                       spi_dout equ cpld_regs_base_write + (%1000 << 4)
-   16/   0 : =$B0                       radio_txw equ cpld_regs_base_write + (%1001 << 4)
-   17/   0 : =$E0                       settings_reg equ cpld_regs_base_write + (%1100 << 4)
-   18/   0 :                            
-   19/   0 : =$100                      spi_flash equ 1<<8
-   20/   0 : =$200                      spi_leds_left equ 2<<8
-   21/   0 : =$400                      spi_leds_right equ 4<<8
+   10/   0 : =$2                        cpld_regs_base_write equ io_write_base + (%0010)
+   11/   0 : =$2                        r1_lo equ cpld_regs_base_write + (%0000)
+   12/   0 : =$3                        r1_hi equ cpld_regs_base_write + (%0001)
+   13/   0 : =$6                        r2_lo equ cpld_regs_base_write + (%0100)
+   14/   0 : =$7                        r2_hi equ cpld_regs_base_write + (%0101)
+   15/   0 : =$A                        spi_dout equ cpld_regs_base_write + (%1000)
+   16/   0 : =$B                        radio_txw equ cpld_regs_base_write + (%1001)
+   17/   0 : =$E                        settings_reg equ cpld_regs_base_write + (%1100)
+   18/   0 : =$F                        sid_base equ cpld_regs_base_write + (%1101)
+   19/   0 :                            
+   20/   0 :                            ; When writing to SID, bits 0 - 7 of the dataword is the data
+   21/   0 :                            ; and bits 8 - 13 is the address
    22/   0 :                            
-   23/   0 : =$1                        r_clr_keyrupt equ 1
-   24/   0 : =$2                        r_clr_trupt equ 2
-   25/   0 : =$4                        r_clr_urupt equ 4
-   26/   0 : =$8                        r_chg_timer equ 8
-   27/   0 : =$10                       r_timer_en equ 16
-   28/   0 : =$80                       r_chg_mm equ 128
-   29/   0 :                            ; MM value in bits 8 - 15
-   30/   0 :                            
-   31/   0 :                            ; Status register makeup:
-   32/   0 :                            ; - Undefined
-   33/   0 :                            ; .
-   34/   0 :                            ; .
-   35/   0 :                            ; .
-   36/   0 :                            ; .
+   23/   0 : =$100                      spi_flash equ 1<<8
+   24/   0 : =$200                      spi_leds_left equ 2<<8
+   25/   0 : =$400                      spi_leds_right equ 4<<8
+   26/   0 :                            
+   27/   0 : =$1                        r_clr_keyrupt equ 1
+   28/   0 : =$2                        r_clr_trupt equ 2
+   29/   0 : =$4                        r_clr_urupt equ 4
+   30/   0 : =$8                        r_chg_timer equ 8
+   31/   0 : =$10                       r_timer_en equ 16
+   32/   0 : =$80                       r_chg_mm equ 128
+   33/   0 :                            ; MM value in bits 8 - 15
+   34/   0 :                            
+   35/   0 :                            ; Status register makeup:
+   36/   0 :                            ; - Undefined
    37/   0 :                            ; .
    38/   0 :                            ; .
    39/   0 :                            ; .
@@ -45,75 +45,383 @@
    42/   0 :                            ; .
    43/   0 :                            ; .
    44/   0 :                            ; .
-   45/   0 :                            ; - urupt
-   46/   0 :                            ; - keyrupt
-   47/   0 :                            ; - trupt
-   48/   0 :                            
-   49/   0 :                            ; Settings on GPIO output port
-   50/   0 : =$1                        gr_sign_r2 equ 1
-   51/   0 : =$2                        gr_lamp_temp equ 2
-   52/   0 : =$4                        gr_sign_r1 equ 4
-   53/   0 : =$8                        gr_lamp_restart equ 8
-   54/   0 : =$10                       gr_lamp_opr_err equ 16
-   55/   0 : =$20                       gr_lamp_comp_acty equ 32
-   56/   0 : =$40                       gr_int_inhibit equ 64
-   57/   0 : =$80                       gr_flash_csb equ 128
-   58/   0 :                            
-   59/   0 :                            start:
-   60/   0 : 00EF                       	CLA settings_reset
- AS V1.42 Beta [Bld 273] - Source File boot.asm - Page 2 - 06.03.2025 19:32:10
+   45/   0 :                            ; .
+   46/   0 :                            ; .
+   47/   0 :                            ; .
+   48/   0 :                            ; .
+   49/   0 :                            ; - urupt
+   50/   0 :                            ; - keyrupt
+   51/   0 :                            ; - trupt
+   52/   0 :                            
+   53/   0 :                            ; Settings on GPIO output port
+   54/   0 : =$1                        gr_sign_r2 equ 1
+   55/   0 : =$2                        gr_lamp_temp equ 2
+   56/   0 : =$4                        gr_sign_r1 equ 4
+   57/   0 : =$8                        gr_lamp_restart equ 8
+   58/   0 : =$10                       gr_lamp_opr_err equ 16
+   59/   0 : =$20                       gr_lamp_comp_acty equ 32
+   60/   0 : =$40                       gr_int_inhibit equ 64
+ AS V1.42 Beta [Bld 273] - Source File boot.asm - Page 2 - 12.03.2025 20:53:21
 
 
-   61/   1 : 00EA                       	PIO settings_reset
-   62/   2 : 010F                       	CLA initial_gpio
-   63/   3 : 0A0A                       	PIO gpio_out
-   64/   4 : 000A                       	PIO io_write_base
-   65/   5 :                            error_halt:
-   66/   5 : 082E                       	CDSD 0,4
-   67/   6 : 00A8                       	TRA error_halt
-   68/   7 :                            
-   69/   7 :                            settings_reset:
-   70/   7 : 000F                       	dw r_clr_keyrupt + r_clr_trupt + r_chg_timer + r_clr_urupt
-   71/   8 :                            initial_gpio:
-   72/   8 : 00E8                       	dw gr_lamp_restart + gr_lamp_comp_acty + gr_int_inhibit + gr_flash_csb
-   73/   9 :                            
- AS V1.42 Beta [Bld 273] - Source File boot.asm - Page 3 - 06.03.2025 19:32:10
+   61/   0 : =$80                       gr_flash_csb equ 128
+   62/   0 :                            	org 0
+   63/   0 :                            start:
+   64/   0 : 0000000E                   	CDSS 0,0
+   65/   1 : 00000D0F                   	CLA settings_reset
+   66/   2 : 000001CA                   	PIO settings_reg
+   67/   3 : 00000D2F                   	CLA initial_gpio
+   68/   4 : 00000D47                   	ADD flash_csb_bit
+   69/   5 : 000000AA                   	PIO gpio_out
+   70/   6 : 00000DAF                   	CLA sid_shutup
+   71/   7 : 000001EA                   	PIO sid_base
+   72/   8 : 00000DCF                   	CLA sid_shutup+1
+   73/   9 : 000001EA                   	PIO sid_base
+   74/   A : 00000DEF                   	CLA sid_shutup+2
+   75/   B : 000001EA                   	PIO sid_base
+   76/   C : 00000E0F                   	CLA sid_shutup+3
+   77/   D : 000001EA                   	PIO sid_base
+   78/   E : 0000001E                   	CL
+   79/   F : 0000004A                   	PIO r1_lo
+   80/  10 : 000000CA                   	PIO r2_lo
+   81/  11 : 0000006A                   	PIO r1_hi
+   82/  12 : 000000EA                   	PIO r2_hi
+   83/  13 :                            	
+   84/  13 : 00000F4F                   	CLA startup_del
+   85/  14 :                            start_del_loop:
+   86/  14 : 00000F22                   	SUB one
+   87/  15 : 00000284                   	TNZ start_del_loop
+   88/  16 : 00000E2F                   	CLA sid_beep
+   89/  17 : 000001EA                   	PIO sid_base
+   90/  18 : 00000E4F                   	CLA sid_beep+1
+   91/  19 : 000001EA                   	PIO sid_base
+   92/  1A : 00000E6F                   	CLA sid_beep+2
+   93/  1B : 000001EA                   	PIO sid_base
+   94/  1C : 00000E8F                   	CLA sid_beep+3
+   95/  1D : 000001EA                   	PIO sid_base
+   96/  1E : 00000EAF                   	CLA sid_beep+4
+   97/  1F : 000001EA                   	PIO sid_base
+   98/  20 : 00000ECF                   	CLA sid_beep+5
+   99/  21 : 000001EA                   	PIO sid_base
+  100/  22 : 00000EEF                   	CLA sid_beep+6
+  101/  23 : 000001EA                   	PIO sid_base
+  102/  24 : 00000F0F                   	CLA sid_beep+7
+  103/  25 : 000001EA                   	PIO sid_base
+  104/  26 : 00000F4F                   	CLA startup_del
+  105/  27 :                            start_del_loop2:
+  106/  27 : 00000F22                   	SUB one
+  107/  28 : 0000000E                   	CDSS 0,0
+  108/  29 : 0000000E                   	CDSS 0,0
+  109/  2A : 0000000E                   	CDSS 0,0
+  110/  2B : 0000000E                   	CDSS 0,0
+  111/  2C : 000004E4                   	TNZ start_del_loop2
+  112/  2D :                            	
+  113/  2D :                            	; Select spiflash
+  114/  2D : 00000D2F                   	CLA initial_gpio
+  115/  2E : 000000AA                   	PIO gpio_out
+  116/  2F : 00000F6F                   	CLA initial_spi_cmds
+  117/  30 : 0000014A                   	PIO spi_dout
+  118/  31 : 00000D2F                   	CLA initial_gpio
+  119/  32 : 00000D47                   	ADD flash_csb_bit
+  120/  33 : 000000AA                   	PIO gpio_out
+ AS V1.42 Beta [Bld 273] - Source File boot.asm - Page 3 - 12.03.2025 20:53:21
+
+
+  121/  34 : 00000D42                   	SUB flash_csb_bit
+  122/  35 : 000000AA                   	PIO gpio_out
+  123/  36 : 00000F8F                   	CLA initial_spi_cmds+1
+  124/  37 : 0000014A                   	PIO spi_dout
+  125/  38 : 00000FCF                   	CLA initial_spi_cmds+3
+  126/  39 : 0000000E                   	CDSS 0,0
+  127/  3A : 0000014A                   	PIO spi_dout
+  128/  3B : 00000D2F                   	CLA initial_gpio
+  129/  3C : 00000D47                   	ADD flash_csb_bit
+  130/  3D : 000000AA                   	PIO gpio_out
+  131/  3E : 00000D42                   	SUB flash_csb_bit
+  132/  3F : 000000AA                   	PIO gpio_out
+  133/  40 : 00000FAF                   	CLA initial_spi_cmds+2
+  134/  41 : 0000014A                   	PIO spi_dout
+  135/  42 : 00000FCF                   	CLA initial_spi_cmds+3
+  136/  43 : 0000000E                   	CDSS 0,0
+  137/  44 : 0000014A                   	PIO spi_dout
+  138/  45 : 0000000E                   	CDSS 0,0
+  139/  46 : 0000014A                   	PIO spi_dout
+  140/  47 : 0000000E                   	CDSS 0,0
+  141/  48 : 0000014A                   	PIO spi_dout
+  142/  49 : 0000000E                   	CDSS 0,0
+  143/  4A : 0000014A                   	PIO spi_dout
+  144/  4B : 0000000E                   	CDSS 0,0
+  145/  4C : 0000014A                   	PIO spi_dout
+  146/  4D : 00000D2F                   	CLA initial_gpio
+  147/  4E : 00000D47                   	ADD flash_csb_bit
+  148/  4F : 000000AA                   	PIO gpio_out
+  149/  50 : 0000015A                   	PIO spi_din ; Should now contain flash manufacturer and device IDs
+  150/  51 : 000000CA                   	PIO r2_lo
+  151/  52 : 00000FE2                   	SUB expected_spi_id
+  152/  53 : 00000B04                   	TNZ error_spi
+  153/  54 : 00000D2F                   	CLA initial_gpio
+  154/  55 : 0000001B                   	STO +0
+  155/  56 : 00000AE0 00000008          	HOP* mem_init
+  156/  58 :                            	
+  157/  58 :                            	;CLA sid_beep_release
+  158/  58 :                            	;PIO sid_base
+  159/  58 :                            error_spi:
+  160/  58 : 00000B0F                   	CLA error_spi
+  161/  59 : 0000004A                   	PIO r1_lo
+  162/  5A :                            error_halt:
+  163/  5A : 0000000E                   	CDSS 0,0
+  164/  5B : 00000D6F                   	CLA gpio_fault
+  165/  5C : 000000AA                   	PIO gpio_out
+  166/  5D : 00000D8F                   	CLA settings_fault
+  167/  5E : 000001CA                   	PIO settings_reg
+  168/  5F : 00000DAF                   	CLA sid_shutup
+  169/  60 : 000001EA                   	PIO sid_base
+  170/  61 : 00000DCF                   	CLA sid_shutup+1
+  171/  62 : 000001EA                   	PIO sid_base
+  172/  63 : 00000DEF                   	CLA sid_shutup+2
+  173/  64 : 000001EA                   	PIO sid_base
+  174/  65 : 00000E0F                   	CLA sid_shutup+3
+  175/  66 : 000001EA                   	PIO sid_base
+  176/  67 : 00000B48                   	TRA error_halt
+  177/  68 :                            
+  178/  68 :                            settings_reset:
+  179/  68 : 0000998F                   	dd r_clr_keyrupt + r_clr_trupt + r_chg_timer + r_clr_urupt + r_chg_mm + ($99 << 8)
+  180/  69 :                            initial_gpio:
+ AS V1.42 Beta [Bld 273] - Source File boot.asm - Page 4 - 12.03.2025 20:53:21
+
+
+  181/  69 : 00000068                   	dd gr_lamp_restart + gr_lamp_comp_acty + gr_int_inhibit
+  182/  6A :                            flash_csb_bit:
+  183/  6A : 00000080                   	dd gr_flash_csb
+  184/  6B :                            gpio_fault:
+  185/  6B : 000000D0                   	dd gr_int_inhibit + gr_flash_csb + gr_lamp_opr_err
+  186/  6C :                            settings_fault:
+  187/  6C : 0000FF88                   	dd r_chg_timer + r_chg_mm + ($FF << 8)
+  188/  6D :                            sid_shutup:
+  189/  6D : 00000400                   	dd (4<<8) + 0
+  190/  6E : 00000B00                   	dd (11<<8) + 0
+  191/  6F : 00001200                   	dd (18<<8) + 0
+  192/  70 : 00001880                   	dd (24<<8) + $80
+  193/  71 :                            sid_beep:
+  194/  71 : 000000A0                   	dd (0<<8) + $A0
+  195/  72 : 0000010F                   	dd (1<<8) + $0F
+  196/  73 : 00000504                   	dd (5<<8) + $04
+  197/  74 : 000006E9                   	dd (6<<8) + $E9
+  198/  75 : 00000200                   	dd (2<<8) + $00
+  199/  76 : 00000309                   	dd (3<<8) + $09
+  200/  77 : 0000188F                   	dd (24<<8) + $8F
+  201/  78 : 00000441                   	dd (4<<8) + $41
+  202/  79 :                            one:
+  203/  79 : 00000001                   	dd 1
+  204/  7A :                            startup_del:
+  205/  7A : 00000005                   	dd 5 ; Larger on real HW
+  206/  7B :                            initial_spi_cmds:
+  207/  7B : 000001FF                   	dd $FF+spi_flash
+  208/  7C : 000001AB                   	dd $AB+spi_flash
+  209/  7D : 00000190                   	dd $90+spi_flash
+  210/  7E : 00000100                   	dd $00+spi_flash
+  211/  7F :                            expected_spi_id:
+  212/  7F : 0000EF15                   	dd $EF15
+  213/  80 :                            error_code_spi:
+  214/  80 : 00000101                   	dd $0101
+  215/  81 :                            
+  216/  81 :                            
+  217/  81 :                            
+  218/  81 :                            
+  219/  81 :                            
+  220/ 100 :                            	org 256
+  221/ 100 :                            interrupt:
+  222/ 100 : 00000008                   	TRA interrupt
+  223/ 101 :                            
+  224/ 101 :                            
+  225/ 101 :                            
+  226/ 101 :                            
+  227/ 101 :                            
+  228/ 200 :                            	org 512
+  229/ 200 :                            mem_init:
+  230/ 200 : 0000042E                   	CDSD 0,2
+  231/ 201 :                            	; Select ROM & send read command to address 0
+  232/ 201 : 0000001F                   	CLA +0
+  233/ 202 : 000000AA                   	PIO gpio_out
+  234/ 203 : 00000B2F                   	CLA read_cmd
+  235/ 204 : 0000014A                   	PIO spi_dout
+  236/ 205 : 0000001E                   	CL
+  237/ 206 : 00000B4F                   	CLA spi_dummy
+  238/ 207 : 0000014A                   	PIO spi_dout
+  239/ 208 : 0000001E                   	CL
+  240/ 209 : 00000B4F                   	CLA spi_dummy
+ AS V1.42 Beta [Bld 273] - Source File boot.asm - Page 5 - 12.03.2025 20:53:21
+
+
+  241/ 20A : 0000014A                   	PIO spi_dout
+  242/ 20B : 0000001E                   	CL
+  243/ 20C : 00000B4F                   	CLA spi_dummy
+  244/ 20D : 0000014A                   	PIO spi_dout
+  245/ 20E :                            	; We shall do indexed addressing in a cursed way: dynamically assembling bytecode in the residual sector for
+  246/ 20E :                            	; +2: CDS (acc>>8)<<1
+  247/ 20E :                            	; +3: STO acc&255
+  248/ 20E :                            	; +4: HOP +5
+  249/ 20E :                            	; +5: HOP constant to go back to ROM
+  250/ 20E : 00000BEF                   	CLA residual_bytecode+2
+  251/ 20F : 0000009B                   	STO +4
+  252/ 210 : 00000C2F                   	CLA residual_bytecode+4
+  253/ 211 : 000000BB                   	STO +5
+  254/ 212 : 00000C4F                   	CLA start_ram_address
+  255/ 213 : 000000DB                   	STO +6
+  256/ 214 : 00000C6F                   	CLA mem_size
+  257/ 215 : 0000011B                   	STO +8
+  258/ 216 :                            copy_loop:
+  259/ 216 :                            	; All this to compose the CDS instruction
+  260/ 216 : 000000DF                   	CLA +6
+  261/ 217 : 0000005E                   	SHR 2
+  262/ 218 : 0000005E                   	SHR 2
+  263/ 219 : 0000005E                   	SHR 2
+  264/ 21A : 0000005E                   	SHR 2
+  265/ 21B : 000000FB                   	STO +7
+  266/ 21C : 00000CA6                   	AND and_vals+0
+  267/ 21D : 0000041E                   	SHL 2
+  268/ 21E : 0000041E                   	SHL 2
+  269/ 21F : 0000005B                   	STO +2
+  270/ 220 : 000000FF                   	CLA +7
+  271/ 221 : 0000005E                   	SHR 2
+  272/ 222 : 0000005E                   	SHR 2
+  273/ 223 : 00000CE6                   	AND and_vals+2
+  274/ 224 : 0000021E                   	SHL 1
+  275/ 225 : 00000057                   	ADD +2
+  276/ 226 : 0000041E                   	SHL 2
+  277/ 227 : 0000021E                   	SHL 1
+  278/ 228 : 0000041E                   	SHL 2
+  279/ 229 : 00000BA7                   	ADD residual_bytecode+0
+  280/ 22A : 0000005B                   	STO +2
+  281/ 22B :                            	; STO
+  282/ 22B : 000000DF                   	CLA +6
+  283/ 22C : 00000CC6                   	AND and_vals+1
+  284/ 22D : 0000041E                   	SHL 2
+  285/ 22E : 0000041E                   	SHL 2
+  286/ 22F : 0000021E                   	SHL 1
+  287/ 230 : 00000BC7                   	ADD residual_bytecode+1
+  288/ 231 : 0000007B                   	STO +3
+  289/ 232 :                            	; Get next word from spiflash
+  290/ 232 : 00000B4F                   	CLA spi_dummy
+  291/ 233 : 0000014A                   	PIO spi_dout
+  292/ 234 : 0000014A                   	PIO spi_dout
+  293/ 235 : 0000015A                   	PIO spi_din
+  294/ 236 : 0000041E                   	SHL 2
+  295/ 237 : 0000041E                   	SHL 2
+  296/ 238 : 0000041E                   	SHL 2
+  297/ 239 : 0000041E                   	SHL 2
+  298/ 23A : 0000041E                   	SHL 2
+  299/ 23B : 0000041E                   	SHL 2
+  300/ 23C : 0000041E                   	SHL 2
+ AS V1.42 Beta [Bld 273] - Source File boot.asm - Page 6 - 12.03.2025 20:53:21
+
+
+  301/ 23D : 0000041E                   	SHL 2
+  302/ 23E : 000000FB                   	STO +7
+  303/ 23F : 00000B4F                   	CLA spi_dummy
+  304/ 240 : 0000014A                   	PIO spi_dout
+  305/ 241 : 0000014A                   	PIO spi_dout
+  306/ 242 : 0000015A                   	PIO spi_din
+  307/ 243 : 000000F7                   	ADD +7
+  308/ 244 :                            	; Write to next location in RAM
+  309/ 244 : 000008A0 0000013C          	HOP* $0F02
+  310/ 246 :                            continue:
+  311/ 246 : 0000040E                   	CDSS 0,2
+  312/ 247 : 000000DF                   	CLA +6
+  313/ 248 : 00000C87                   	ADD one_inc
+  314/ 249 : 000000DB                   	STO +6
+  315/ 24A : 0000011F                   	CLA +8
+  316/ 24B : 00000C82                   	SUB one_inc
+  317/ 24C : 0000011B                   	STO +8
+  318/ 24D : 000002C4                   	TNZ copy_loop
+  319/ 24E :                            	
+  320/ 24E :                            	; Deselect & clear lamps
+  321/ 24E : 00000B6F                   	CLA final_gpio
+  322/ 24F : 000000AA                   	PIO gpio_out
+  323/ 250 : 0000001E                   	CL
+  324/ 251 : 0000004A                   	PIO r1_lo
+  325/ 252 : 000000CA                   	PIO r2_lo
+  326/ 253 : 0000006A                   	PIO r1_hi
+  327/ 254 : 000000EA                   	PIO r2_hi
+  328/ 255 :                            	; No more beep
+  329/ 255 : 00000B8F                   	CLA sid_beep_release
+  330/ 256 : 000001EA                   	PIO sid_base
+  331/ 257 : 00000B00 00000010          	HOP* $0400
+  332/ 259 :                            read_cmd:
+  333/ 259 : 00000103                   	dd $03+spi_flash
+  334/ 25A :                            spi_dummy:
+  335/ 25A : 00000100                   	dd $00+spi_flash
+  336/ 25B :                            final_gpio:
+  337/ 25B : 000000C0                   	dd gr_int_inhibit + gr_flash_csb
+  338/ 25C :                            sid_beep_release:
+  339/ 25C : 00000440                   	dd (4<<8) + $40
+  340/ 25D :                            residual_bytecode:
+  341/ 25D : 0000000E                   	dd $0E
+  342/ 25E : 0000000B                   	dd $0B
+  343/ 25F : 000000B0                   	HOP +5
+  344/ 260 : 00000C20 00002308          	HOP* continue
+  345/ 262 :                            start_ram_address:
+  346/ 262 : 00000400                   	dd $0400
+  347/ 263 :                            mem_size:
+  348/ 263 : 000001FF                   	dd $05FF-$0400 ; More on real HW
+  349/ 264 :                            one_inc:
+  350/ 264 : 00000001                   	dd 1
+  351/ 265 :                            and_vals:
+  352/ 265 : 0000000F                   	dd $00F
+  353/ 266 : 000000FF                   	dd $0FF
+  354/ 267 : 00000007                   	dd $007
+  355/ 268 :                            
+ AS V1.42 Beta [Bld 273] - Source File boot.asm - Page 7 - 12.03.2025 20:53:21
 
 
   Symbol Table (* = unused):
   --------------------------
 
+ AND_VALS :                     265 C |
 *ARCHITECTURE :                                      "x86_64-unknown-linux" - |
 *CASESENSITIVE :                  0 - | *CONSTPI :        3.141592653589793 - |
- CPLD_REGS_BASE_WRITE :          20 - | *DATE :                "06.03.2025" - |
- ERROR_HALT :                     5 C | *FALSE :                          0 - |
-*GPIO_IN :                      150 - |  GPIO_OUT :                      50 - |
+ CONTINUE :                     246 C |  COPY_LOOP :                    216 C |
+ CPLD_REGS_BASE_WRITE :           2 - | *DATE :                "12.03.2025" - |
+*ERROR_CODE_SPI :                80 C |  ERROR_HALT :                    5A C |
+ ERROR_SPI :                     58 C |  EXPECTED_SPI_ID :               7F C |
+*FALSE :                          0 - |  FINAL_GPIO :                   25B C |
+ FLASH_CSB_BIT :                 6A C |  GPIO_FAULT :                    6B C |
+*GPIO_IN :                      105 - |  GPIO_OUT :                       5 - |
  GR_FLASH_CSB :                  80 - |  GR_INT_INHIBIT :                40 - |
- GR_LAMP_COMP_ACTY :             20 - | *GR_LAMP_OPR_ERR :               10 - |
+ GR_LAMP_COMP_ACTY :             20 - |  GR_LAMP_OPR_ERR :               10 - |
  GR_LAMP_RESTART :                8 - | *GR_LAMP_TEMP :                   2 - |
 *GR_SIGN_R1 :                     4 - | *GR_SIGN_R2 :                     1 - |
-*HAS64 :                          1 - |  INITIAL_GPIO :                   8 C |
+*HAS64 :                          1 - |  INITIAL_GPIO :                  69 C |
+ INITIAL_SPI_CMDS :              7B C |  INTERRUPT :                    100 C |
  IO_READ_BASE :                 100 - |  IO_WRITE_BASE :                  0 - |
 *LISTON :                         1 - | *MACEXP :                         7 - |
+ MEM_INIT :                     200 C |  MEM_SIZE :                     263 C |
 *MOMCPU :                         0 - | *MOMCPUNAME :                "LVDC" - |
-*NESTMAX :                      100 - | *R1_HI :                         30 - |
-*R1_LO :                         20 - | *R2_HI :                         70 - |
-*R2_LO :                         60 - | *RADIO_READ :                   180 - |
-*RADIO_TXW :                     B0 - | *RELAXED :                        0 - |
-*R_CHG_MM :                      80 - |  R_CHG_TIMER :                    8 - |
+*NESTMAX :                      100 - |  ONE :                           79 C |
+ ONE_INC :                      264 C |  R1_HI :                          3 - |
+ R1_LO :                          2 - |  R2_HI :                          7 - |
+ R2_LO :                          6 - | *RADIO_READ :                   108 - |
+*RADIO_TXW :                      B - |  READ_CMD :                     259 C |
+*RELAXED :                        0 - |  RESIDUAL_BYTECODE :            25D C |
+ R_CHG_MM :                      80 - |  R_CHG_TIMER :                    8 - |
  R_CLR_KEYRUPT :                  1 - |  R_CLR_TRUPT :                    2 - |
  R_CLR_URUPT :                    4 - | *R_TIMER_EN :                    10 - |
-*SETTINGS_REG :                  E0 - |  SETTINGS_RESET :                 7 C |
-*SPI_DIN :                      1F0 - | *SPI_DOUT :                      A0 - |
-*SPI_FLASH :                    100 - | *SPI_LEDS_LEFT :                200 - |
+ SETTINGS_FAULT :                6C C |  SETTINGS_REG :                   E - |
+ SETTINGS_RESET :                68 C |  SID_BASE :                       F - |
+ SID_BEEP :                      71 C |  SID_BEEP_RELEASE :             25C C |
+ SID_SHUTUP :                    6D C |  SPI_DIN :                      10A - |
+ SPI_DOUT :                       A - |  SPI_DUMMY :                    25A C |
+ SPI_FLASH :                    100 - | *SPI_LEDS_LEFT :                200 - |
 *SPI_LEDS_RIGHT :               400 - | *START :                          0 C |
-*STATUS_READ :                  1E0 - | *TIME :                  "19:32:10" - |
+ STARTUP_DEL :                   7A C |  START_DEL_LOOP :                14 C |
+ START_DEL_LOOP2 :               27 C |  START_RAM_ADDRESS :            262 C |
+*STATUS_READ :                  10E - | *TIME :                  "20:53:21" - |
 *TRUE :                           1 - | *VERSION :                     142F - |
 
-     51 symbols
-     36 unused symbols
+     78 symbols
+     27 unused symbols
 
- AS V1.42 Beta [Bld 273] - Source File boot.asm - Page 4 - 06.03.2025 19:32:10
+ AS V1.42 Beta [Bld 273] - Source File boot.asm - Page 8 - 12.03.2025 20:53:21
 
 
   Code Pages:
@@ -125,7 +433,7 @@ STANDARD (0 changed characters)
 
 0.01 seconds assembly time
 
-     73 lines source file
+    355 lines source file
       2 passes
       0 errors
       0 warnings
