@@ -10,6 +10,7 @@ ARCH = LVDC
 
 boot: boot.bin
 	java ToVerilogHex.java boot.bin ../../Bench/rom
+	java ToBin.java boot.bin
 
 clean:
 	rm -rf *.bin *.p

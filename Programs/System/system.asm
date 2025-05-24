@@ -64,6 +64,26 @@ start:
 	CDSD 0,4
 	CLA initial_gpio
 	PIO gpio_out
-	TRA start
+loop:
+	CLA initial_gpio
+	ADD led_gpio
+	PIO gpio_out
+	CLA delay_len
+delay_loop_1:
+	SUB one
+	TNZ delay_loop_1
+	CLA initial_gpio
+	PIO gpio_out
+	CLA delay_len
+delay_loop_2:
+	SUB one
+	TNZ delay_loop_2
+	TRA loop
 initial_gpio:
 	dd gr_lamp_comp_acty + gr_int_inhibit + gr_flash_csb
+led_gpio:
+	dd $FF00
+delay_len:
+	dd $20000
+one:
+	dd 1

@@ -345,7 +345,7 @@ residual_bytecode:
 start_ram_address:
 	dd $0400
 mem_size:
-	dd $05FF-$0400 ; More on real HW
+	dd $0FFF-$0400 ; More on real HW
 one_inc:
 	dd 1
 and_vals:

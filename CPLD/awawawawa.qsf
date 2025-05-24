@@ -1,0 +1,122 @@
+# -------------------------------------------------------------------------- #
+#
+# Copyright (C) 2025  Altera Corporation. All rights reserved.
+# Your use of Altera Corporation's design tools, logic functions 
+# and other software and tools, and any partner logic 
+# functions, and any output files from any of the foregoing 
+# (including device programming or simulation files), and any 
+# associated documentation or information are expressly subject 
+# to the terms and conditions of the Altera Program License 
+# Subscription Agreement, the Altera Quartus Prime License Agreement,
+# the Altera IP License Agreement, or other applicable license
+# agreement, including, without limitation, that your use is for
+# the sole purpose of programming logic devices manufactured by
+# Altera and sold by Altera or its authorized distributors.  Please
+# refer to the Altera Software License Subscription Agreements 
+# on the Quartus Prime software download page.
+#
+# -------------------------------------------------------------------------- #
+#
+# Quartus Prime
+# Version 24.1std.0 Build 1077 03/04/2025 SC Lite Edition
+# Date created = 00:18:12  Mai 22, 2025
+#
+# -------------------------------------------------------------------------- #
+#
+# Notes:
+#
+# 1) The default values for assignments are stored in the file:
+#		awawawawa_assignment_defaults.qdf
+#    If this file doesn't exist, see file:
+#		assignment_defaults.qdf
+#
+# 2) Intel recommends that you do not modify this file. This
+#    file is updated automatically by the Quartus Prime software
+#    and any changes you make may be lost or overwritten.
+#
+# -------------------------------------------------------------------------- #
+
+
+set_global_assignment -name FAMILY "MAX II"
+set_global_assignment -name DEVICE EPM240T100C5
+set_global_assignment -name TOP_LEVEL_ENTITY awawawawa
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION 24.1STD.0
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "00:18:12  MAI 22, 2025"
+set_global_assignment -name LAST_QUARTUS_VERSION "24.1std.0 Lite Edition"
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name DEVICE_FILTER_PACKAGE TQFP
+set_global_assignment -name DEVICE_FILTER_PIN_COUNT 100
+set_global_assignment -name ERROR_CHECK_FREQUENCY_DIVISOR "-1"
+set_global_assignment -name POWER_EXT_SUPPLY_VOLTAGE_TO_REGULATOR 3.3V
+set_global_assignment -name VERILOG_FILE awawawawa.v
+set_location_assignment PIN_14 -to BDIR
+set_location_assignment PIN_38 -to GPIO_LOAD
+set_location_assignment PIN_39 -to GPIO_READb
+set_location_assignment PIN_50 -to I[3]
+set_location_assignment PIN_49 -to I[2]
+set_location_assignment PIN_48 -to I[1]
+set_location_assignment PIN_47 -to I[0]
+set_location_assignment PIN_95 -to INTERRUPT
+set_location_assignment PIN_40 -to INT_INHIBIT
+set_location_assignment PIN_2 -to IORb
+set_location_assignment PIN_3 -to IOWb
+set_location_assignment PIN_37 -to KEY_CLEARb
+set_location_assignment PIN_86 -to LED
+set_location_assignment PIN_69 -to R1_SEGS[7]
+set_location_assignment PIN_68 -to R1_SEGS[6]
+set_location_assignment PIN_67 -to R1_SEGS[5]
+set_location_assignment PIN_66 -to R1_SEGS[4]
+set_location_assignment PIN_64 -to R1_SEGS[3]
+set_location_assignment PIN_62 -to R1_SEGS[2]
+set_location_assignment PIN_61 -to R1_SEGS[1]
+set_location_assignment PIN_58 -to R1_SEGS[0]
+set_location_assignment PIN_77 -to R2_SEGS[7]
+set_location_assignment PIN_76 -to R2_SEGS[6]
+set_location_assignment PIN_75 -to R2_SEGS[5]
+set_location_assignment PIN_74 -to R2_SEGS[4]
+set_location_assignment PIN_73 -to R2_SEGS[3]
+set_location_assignment PIN_72 -to R2_SEGS[2]
+set_location_assignment PIN_71 -to R2_SEGS[1]
+set_location_assignment PIN_70 -to R2_SEGS[0]
+set_location_assignment PIN_8 -to RCHECK
+set_location_assignment PIN_6 -to RD0
+set_location_assignment PIN_7 -to RD1
+set_location_assignment PIN_57 -to RD0_OUT
+set_location_assignment PIN_55 -to RD1_OUT
+set_location_assignment PIN_5 -to RPULSE
+set_location_assignment PIN_82 -to RPULSE_OUT
+set_location_assignment PIN_100 -to SCK_FLASH
+set_location_assignment PIN_97 -to SCK_LED1
+set_location_assignment PIN_96 -to SCK_LED2
+set_location_assignment PIN_99 -to SDI
+set_location_assignment PIN_98 -to SDO
+set_location_assignment PIN_1 -to SID_CEb
+set_location_assignment PIN_54 -to SSEL_R1[2]
+set_location_assignment PIN_53 -to SSEL_R1[1]
+set_location_assignment PIN_52 -to SSEL_R1[0]
+set_location_assignment PIN_12 -to clk
+set_location_assignment PIN_15 -to bus[15]
+set_location_assignment PIN_16 -to bus[14]
+set_location_assignment PIN_17 -to bus[13]
+set_location_assignment PIN_18 -to bus[12]
+set_location_assignment PIN_19 -to bus[11]
+set_location_assignment PIN_20 -to bus[10]
+set_location_assignment PIN_21 -to bus[9]
+set_location_assignment PIN_26 -to bus[8]
+set_location_assignment PIN_27 -to bus[7]
+set_location_assignment PIN_28 -to bus[6]
+set_location_assignment PIN_29 -to bus[5]
+set_location_assignment PIN_30 -to bus[4]
+set_location_assignment PIN_33 -to bus[3]
+set_location_assignment PIN_34 -to bus[2]
+set_location_assignment PIN_35 -to bus[1]
+set_location_assignment PIN_36 -to bus[0]
+set_global_assignment -name AUTO_RESTART_CONFIGURATION OFF
+set_global_assignment -name ENABLE_OCT_DONE OFF
+set_global_assignment -name ENABLE_CONFIGURATION_PINS OFF
+set_global_assignment -name ENABLE_BOOT_SEL_PIN OFF
+set_global_assignment -name USE_CONFIGURATION_DEVICE ON
+set_global_assignment -name RESERVE_ALL_UNUSED_PINS "AS INPUT TRI-STATED WITH WEAK PULL-UP"
+set_global_assignment -name ENABLE_DEVICE_WIDE_RESET ON

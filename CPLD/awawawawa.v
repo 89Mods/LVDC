@@ -40,6 +40,9 @@ wire status_read = !IORb && I == 4'b1110;
 assign BDIR = (!IORb && I == 4'b1010) || status_read || radio_read;
 assign bus = BDIR ? (status_read ? {13'hxx, radio_int_source, key_int_state, timer_int_state} : (radio_read ? radio_word : spi_inbuff)) : 16'hzzzz;
 
+reg iow_edge = 1;
+wire iow_trigger = iow_edge && !IOWb;
+
 reg GPIO_LOAD_edge = 0;
 wire GPIO_LOAD_condition = !IOWb && I == 4'b0101;
 assign GPIO_LOAD = !GPIO_LOAD_edge && GPIO_LOAD_condition;
@@ -180,6 +183,7 @@ reg [16:0] timer = 0;
 assign LED = timer[16];
 
 always @(posedge clk) begin
+	 iow_edge <= IOWb;
     SID_CEb <= !(!IOWb && I == 4'hF);
     GPIO_LOAD_edge <= GPIO_LOAD_condition;
     disp_step <= disp_step + 1;
@@ -189,7 +193,7 @@ always @(posedge clk) begin
         timer <= timer + 1;
         if(timer == 17'h1FFFF) timer_int_state <= 1;
     end
-    if(!IOWb && I[1]) begin
+    if(iow_trigger && I[1]) begin
         case({I[3], I[2], I[0]})
             0: R1[15:0] <= bus;
             1: R1[25:16] <= bus[9:0];

@@ -4744,6 +4744,10 @@
 		(uuid "0ec00208-4a81-4e52-9174-ad3077b28ced")
 	)
 	(no_connect
+		(at 55.88 55.88)
+		(uuid "1c760bb8-8bf0-4110-baa1-9b47828f2420")
+	)
+	(no_connect
 		(at 353.06 165.1)
 		(uuid "46da74f6-c229-4ee0-8b94-13a62235d21e")
 	)
@@ -4754,6 +4758,10 @@
 	(no_connect
 		(at 353.06 157.48)
 		(uuid "63b7a280-1aab-40b3-aa59-ead558e34253")
+	)
+	(no_connect
+		(at 55.88 53.34)
+		(uuid "79d7ea92-cc90-43aa-97a6-b84b533b01e9")
 	)
 	(no_connect
 		(at 353.06 162.56)

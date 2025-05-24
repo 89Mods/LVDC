@@ -160,6 +160,10 @@ int main(void) {
 	res[STEP_1 + (0x4 << 3) + ACCUM_ZERO + A9] = 0;
 	res[STEP_1 + (0x4 << 3) + ACCUM_ZERO + A8] = 0;
 	res[STEP_1 + (0x4 << 3) + ACCUM_ZERO + A8 + A9] = 0;
+	res[STEP_1 + (0x4 << 3) + ACCUM_ZERO + ACCUM_NEG] = 0;
+	res[STEP_1 + (0x4 << 3) + ACCUM_ZERO + ACCUM_NEG + A9] = 0;
+	res[STEP_1 + (0x4 << 3) + ACCUM_ZERO + ACCUM_NEG + A8] = 0;
+	res[STEP_1 + (0x4 << 3) + ACCUM_ZERO + ACCUM_NEG + A8 + A9] = 0;
 	
 	//TMI
 	instr_simple(0xC, STEP_1, TRA_EXEC);
@@ -262,6 +266,28 @@ int main(void) {
 		wr_string(outfile, strbuff);
 		if(((i + 1) & 15) == 0) wr_string(outfile, "\n");
 		else wr_string(outfile, " ");
+	}
+	fclose(outfile);
+	
+	outfile = fopen("microcode_hi.dat", "wb");
+	if(!outfile) {
+		printf("Failed to open output file\n");
+		return 1;
+	}
+	for(int i = 0; i < 2048; i++) {
+		uint8_t val = res[i] >> 8;
+		fwrite(&val, 1, 1, outfile);
+	}
+	fclose(outfile);
+	
+	outfile = fopen("microcode_lo.dat", "wb");
+	if(!outfile) {
+		printf("Failed to open output file\n");
+		return 1;
+	}
+	for(int i = 0; i < 2048; i++) {
+		uint8_t val = res[i] & 0xFF;
+		fwrite(&val, 1, 1, outfile);
 	}
 	fclose(outfile);
 	return 0;

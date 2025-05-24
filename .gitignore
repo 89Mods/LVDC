@@ -5,3 +5,11 @@
 KiCad/*/*-backups
 Bench/obj_dir/
 behavioral/obj_dir/
+CPLD/db/
+CPLD/incremental_db/
+CPLD/output_files/
+CPLD/awawawawa.v.bak
+*.lst
+microcode.txt
+*.blend
+*.blend1
