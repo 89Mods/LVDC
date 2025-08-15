@@ -577,7 +577,7 @@
       <a name="width" val="4"/>
     </comp>
     <comp lib="1" loc="(4780,2650)" name="NOT Gate"/>
-    <comp lib="1" loc="(4810,2740)" name="AND Gate"/>
+    <comp lib="1" loc="(4820,2740)" name="NAND Gate"/>
     <comp lib="1" loc="(4870,2580)" name="AND Gate"/>
     <comp lib="1" loc="(4870,2630)" name="AND Gate"/>
     <comp lib="1" loc="(990,1750)" name="NOT Gate"/>
@@ -1400,7 +1400,8 @@
     <wire from="(4800,2600)" to="(4800,2610)"/>
     <wire from="(4800,2600)" to="(4820,2600)"/>
     <wire from="(4800,2610)" to="(4820,2610)"/>
-    <wire from="(4810,2740)" to="(4840,2740)"/>
+    <wire from="(4810,2740)" to="(4820,2740)"/>
+    <wire from="(4820,2740)" to="(4840,2740)"/>
     <wire from="(4840,2740)" to="(4840,3350)"/>
     <wire from="(4870,2580)" to="(4930,2580)"/>
     <wire from="(4870,2630)" to="(4930,2630)"/>

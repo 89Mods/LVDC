@@ -2,15 +2,15 @@
 `timescale 1ns/1ns
 
 module tb(
-	input clk,
-	input irq
+	input clk
 );
 
 wire booted;
+wire keyrupt = countdown == 4096 || countdown == 2048 || countdown == 1024;
 virtual_backplane computer(
 	.clk(clk),
-	.irq(irq),
-	.booted(booted)
+	.booted(booted),
+	.keyrupt(keyrupt)
 );
 
 initial begin
@@ -20,12 +20,23 @@ initial begin
 	$readmemh("../rom_hi.txt", computer.Memory._U17.U17.memory, 0, 2047);
 end
 
-always @(posedge booted) begin
-	$display("Boot complete");
-`ifdef TRACE_ON
-	$dumpfile("tb.vcd");
-	$dumpvars(0, computer);
-`endif
+integer countdown = 0;
+
+reg booted_edge = 0;
+always @(posedge clk) begin
+	booted_edge <= booted;
+	if(booted && !booted_edge) begin
+		$display("Boot complete");
+	`ifdef TRACE_ON
+		$dumpfile("tb.vcd");
+		$dumpvars(0, computer);
+	`endif
+		countdown <= 8192;
+	end
+	if(countdown) begin
+		countdown <= countdown - 1;
+	end
+	if(countdown == 1) $finish();
 end
 
 wire [14:0] mem_addr = computer.Memory._U24.U24.A;

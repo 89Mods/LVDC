@@ -1,64 +1,4 @@
-io_write_base equ 0
-io_read_base equ 1<<8
-
-radio_read equ io_read_base + (%1000)
-status_read equ io_read_base + (%1110)
-spi_din equ io_read_base + (%1010)
-gpio_out equ io_write_base + (%0101)
-gpio_in equ io_read_base + (%0101)
-
-cpld_regs_base_write equ io_write_base + (%0010)
-r1_lo equ cpld_regs_base_write + (%0000)
-r1_hi equ cpld_regs_base_write + (%0001)
-r2_lo equ cpld_regs_base_write + (%0100)
-r2_hi equ cpld_regs_base_write + (%0101)
-spi_dout equ cpld_regs_base_write + (%1000)
-radio_txw equ cpld_regs_base_write + (%1001)
-settings_reg equ cpld_regs_base_write + (%1100)
-sid_base equ cpld_regs_base_write + (%1101)
-
-; When writing to SID, bits 0 - 7 of the dataword is the data
-; and bits 8 - 13 is the address
-
-spi_flash equ 1<<8
-spi_leds_left equ 2<<8
-spi_leds_right equ 4<<8
-
-r_clr_keyrupt equ 1
-r_clr_trupt equ 2
-r_clr_urupt equ 4
-r_chg_timer equ 8
-r_timer_en equ 16
-r_chg_mm equ 128
-; MM value in bits 8 - 15
-
-; Status register makeup:
-; - Undefined
-; .
-; .
-; .
-; .
-; .
-; .
-; .
-; .
-; .
-; .
-; .
-; .
-; - urupt
-; - keyrupt
-; - trupt
-
-; Settings on GPIO output port
-gr_sign_r2 equ 1
-gr_lamp_temp equ 2
-gr_sign_r1 equ 4
-gr_lamp_restart equ 8
-gr_lamp_opr_err equ 16
-gr_lamp_comp_acty equ 32
-gr_int_inhibit equ 64
-gr_flash_csb equ 128
+	include "../System/common_defines.asm"
 	org 0
 start:
 	CDSS 0,0
@@ -82,6 +22,8 @@ start:
 	PIO r2_hi
 	
 	CLA startup_del
+	SHL 2
+	SHL 2
 start_del_loop:
 	SUB one
 	TNZ start_del_loop
@@ -101,15 +43,7 @@ start_del_loop:
 	PIO sid_base
 	CLA sid_beep+7
 	PIO sid_base
-	CLA startup_del
-start_del_loop2:
-	SUB one
-	CDSS 0,0
-	CDSS 0,0
-	CDSS 0,0
-	CDSS 0,0
-	TNZ start_del_loop2
-	
+
 	; Select spiflash
 	CLA initial_gpio
 	PIO gpio_out
@@ -152,6 +86,11 @@ start_del_loop2:
 	TNZ error_spi
 	CLA initial_gpio
 	STO +0
+	CLA startup_del
+start_del_loop2:
+	SUB one
+	CDSS 0,0
+	TNZ start_del_loop2
 	HOP* mem_init
 	
 	;CLA sid_beep_release
@@ -178,7 +117,7 @@ error_halt:
 settings_reset:
 	dd r_clr_keyrupt + r_clr_trupt + r_chg_timer + r_clr_urupt + r_chg_mm + ($99 << 8)
 initial_gpio:
-	dd gr_lamp_restart + gr_lamp_comp_acty + gr_int_inhibit
+	dd gr_lamp_restart + gr_int_inhibit
 flash_csb_bit:
 	dd gr_flash_csb
 gpio_fault:
@@ -191,10 +130,10 @@ sid_shutup:
 	dd (18<<8) + 0
 	dd (24<<8) + $80
 sid_beep:
-	dd (0<<8) + $A0
-	dd (1<<8) + $0F
+	dd (0<<8) + (12000&$FF)
+	dd (1<<8) + (12000>>8)
 	dd (5<<8) + $04
-	dd (6<<8) + $E9
+	dd (6<<8) + $E4
 	dd (2<<8) + $00
 	dd (3<<8) + $09
 	dd (24<<8) + $8F
@@ -202,7 +141,7 @@ sid_beep:
 one:
 	dd 1
 startup_del:
-	dd 5 ; Larger on real HW
+	dd 2048 ; Larger on real HW
 initial_spi_cmds:
 	dd $FF+spi_flash
 	dd $AB+spi_flash
@@ -218,12 +157,34 @@ error_code_spi:
 
 
 	org 256
+interrupt_hop:
+	; to module 0, sector 1, IP = 1
+	; aka. $0101
+	dd %0000000010000100
 interrupt:
-	TRA interrupt
+	STO +$FE
+	STO +$FC
+	CDSS 0,1
+	HOP real_irupt
+	CDSS 0,0
+	CLA +$FC
+	HOP +$FE
+real_irupt:
+	; to module 2, sector 0, IP = 0
+	; aka. $2000
+	dd %0000000000000001
 
 
+	; Entire module 0 is only used as spare memory
+	; Module 1 holds current MM
+	; Module 2 holds interrupt code
+	; Module 3 holds main program loops
+	; Module 4 holds command code
+	; Module 5 holds command code
+	; Module 6 holds utility functions
+	; Module 7 is unassigned
 
-
+	; Only modules 2 - 6 are bootloaded, 1 is loaded dynamically, 7 is unassigned, 0 is mostly just for the ROM
 
 	org 512
 mem_init:
@@ -245,19 +206,22 @@ mem_init:
 	; We shall do indexed addressing in a cursed way: dynamically assembling bytecode in the residual sector for
 	; +2: CDS (acc>>8)<<1
 	; +3: STO acc&255
-	; +4: HOP +5
-	; +5: HOP constant to go back to ROM
+	; +4: CDS 0,0
+	; +5: HOP +6
+	; +6: HOP constant to go back to ROM
 	CLA residual_bytecode+2
 	STO +4
-	CLA residual_bytecode+4
+	CLA residual_bytecode+3
 	STO +5
-	CLA start_ram_address
+	CLA residual_bytecode+5
 	STO +6
+	CLA start_ram_address
+	STO +9
 	CLA mem_size
 	STO +8
 copy_loop:
 	; All this to compose the CDS instruction
-	CLA +6
+	CLA +9
 	SHR 2
 	SHR 2
 	SHR 2
@@ -279,7 +243,7 @@ copy_loop:
 	ADD residual_bytecode+0
 	STO +2
 	; STO
-	CLA +6
+	CLA +9
 	AND and_vals+1
 	SHL 2
 	SHL 2
@@ -291,6 +255,7 @@ copy_loop:
 	PIO spi_dout
 	PIO spi_dout
 	PIO spi_din
+	
 	SHL 2
 	SHL 2
 	SHL 2
@@ -300,18 +265,33 @@ copy_loop:
 	SHL 2
 	SHL 2
 	STO +7
+	
 	CLA spi_dummy
 	PIO spi_dout
 	PIO spi_dout
 	PIO spi_din
 	ADD +7
+	STO +7
+
+	PIO r1_lo
+	SHR 2
+	SHR 2
+	SHR 2
+	SHR 2
+	SHR 2
+	SHR 2
+	SHR 2
+	SHR 2
+	PIO r1_hi
+	
+	CLA +7
 	; Write to next location in RAM
-	HOP* $0F02
+	HOP* $0F02,0,0
 continue:
 	CDSS 0,2
-	CLA +6
+	CLA +9
 	ADD one_inc
-	STO +6
+	STO +9
 	CLA +8
 	SUB one_inc
 	STO +8
@@ -325,30 +305,62 @@ continue:
 	PIO r2_lo
 	PIO r1_hi
 	PIO r2_hi
+	CDSS 0,1
+	CLA mem_init ; interrupt_hop
+	CDSS 1,1
+	STO mem_init
+	CDSS 2,1
+	STO mem_init
+	CDSS 3,1
+	STO mem_init
+	CDSS 4,1
+	STO mem_init
+	CDSS 5,1
+	STO mem_init
+	CDSS 6,1
+	STO mem_init
+	CDSS 7,1
+	STO mem_init
+	CDSS 0,2
 	; No more beep
 	CLA sid_beep_release
 	PIO sid_base
-	HOP* $0400
+	; Need to HOP to $2060001, but this overflows the 16-bit ROM
+	CLA hop0
+	SHL 2
+	SHL 2
+	SHL 2
+	SHL 2
+	SHL 2
+	ADD hop0+1
+	STO +1
+	HOP +1
 read_cmd:
 	dd $03+spi_flash
 spi_dummy:
 	dd $00+spi_flash
 final_gpio:
-	dd gr_int_inhibit + gr_flash_csb
+	dd gr_lamp_comp_acty + gr_int_inhibit + gr_flash_csb
 sid_beep_release:
 	dd (4<<8) + $40
 residual_bytecode:
 	dd $0E
 	dd $0B
-	HOP +5
+	dd $0E
+	HOP +6
 	HOP* continue
 start_ram_address:
-	dd $0400
+	dd $2000
+	;dd $3000
 mem_size:
-	dd $0FFF-$0400 ; More on real HW
+	dd $7FFF-$2000
+	;dd $3FFF-$2000
 one_inc:
 	dd 1
 and_vals:
 	dd $00F
 	dd $0FF
 	dd $007
+hop0:
+	dd $8180
+	dd $0001

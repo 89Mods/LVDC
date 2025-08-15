@@ -8,7 +8,9 @@ module io_emulation(
 	input clockin,
 	input nIOR,
 	input nIOW,
-	output reg booted = 0
+	output reg booted = 0,
+	input KEY_CLEARb,
+	output INTERRUPT_OUT
 );
 
 reg V3_rstb;
@@ -82,6 +84,11 @@ wire V3_clockin;
 ttl_74lv1t34 U8(
 	.A(clockin),
 	.Y(V3_clockin)
+);
+
+ttl_74lv1t34 U24(
+	.A(V3_INTERRUPT),
+	.Y(INTERRUPT_OUT)
 );
 
 wire GPIO_READb;
@@ -158,7 +165,7 @@ awawawawa CPLD(
 	.RCHECK(1'b0),
 	.BDIR(BDIR),
 	.bus(V3_DB),
-	.KEY_CLEARb(1'b1),
+	.KEY_CLEARb(KEY_CLEARb),
 	.GPIO_LOAD(GPIO_LOAD),
 	.GPIO_READb(GPIO_READb),
 	.INT_INHIBIT(INT_INHIBIT),

@@ -44,18 +44,11 @@ int main(int argc, char** argv, char** env) {
 #endif
 	total_time = 0;
 	top.clk = 0;
-	top.irq = 0;
 	unsigned long counter = 0;
-	while(!Verilated::gotFinish() && counter < 1024000) {
+	while(!Verilated::gotFinish() && counter < 81920000) {
 		top.clk = !top.clk;
 		advance();
 		counter++;
-		if(counter == 201) {
-			//top.irq = 1;
-		}
-		if(counter == 202) {
-			//top.irq = 0;
-		}
 	}
 	top.final();
 	return 0;

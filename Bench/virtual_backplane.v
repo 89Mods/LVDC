@@ -2,8 +2,8 @@
 
 module virtual_backplane(
 	input clk,
-	input irq,
-	output booted
+	output booted,
+	input keyrupt
 );
 
 wire rstb_wire;
@@ -12,9 +12,6 @@ assign rstb_wire = rstb;
 tri0 [25:0] databus;
 wire [12:0] instruction;
 wire [25:0] accumulator;
-
-tri0 INT_IN;
-assign INT_IN = irq;
 
 //ALU <-> Control
 wire IS_RSU;
@@ -145,6 +142,7 @@ Memory Memory(
 	.EXM_EXEC_I(EXM_EXEC_I), .HOP_INSTEAD_OF_A(HOP_INSTEAD_OF_A), .EXM_SECTOR0(EXM_SECTOR[0]), .EXM_SECTOR1(EXM_SECTOR[1]), .EXM_SECTOR2(EXM_SECTOR[2])
 );
 
+wire INT_IN;
 Control Control(
 	.INT_IN(INT_IN),
 	//Backplane connections
@@ -180,7 +178,9 @@ io_emulation IO(
 	.clockin(clk),
 	.nIOR(nIOR),
 	.nIOW(nIOW),
-	.booted(booted)
+	.booted(booted),
+	.KEY_CLEARb(!keyrupt),
+	.INTERRUPT_OUT(INT_IN)
 );
 
 endmodule

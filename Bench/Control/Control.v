@@ -315,11 +315,11 @@ module Control
     Net__U12_IslashO4_, Net__U15_Pad10_, nR_H, Net__U15_Pad2_, Net__U15_Pad10_,
     Net__U15_Pad10_, Net__U14_nMR_, Net__U15_Pad12_, Net__U15_Pad12_);
 
-   Control_U16 _U16(RST, H_CYC_1, Net__U15_Pad12_, Net__U16_Pad4_, I1,
+   Control_U16 _U16(RST, H_CYC_1, Net__U15_Pad12_, Net__U16_Pad4_, I2,
     Net__U16_Pad12_, Net__U16_Pad13_, Net__U16_Pad9_, Net__U16_Pad10_,
     Net__U16_Pad11_, Net__U16_Pad12_, Net__U16_Pad13_);
 
-   Control_U17 _U17(I0, Net__U16_Pad4_, I2, Net__U16_Pad9_, I3, Net__U16_Pad10_,
+   Control_U17 _U17(I0, Net__U16_Pad4_, I1, Net__U16_Pad9_, I3, Net__U16_Pad10_,
     Net__U17_Pad8_, Net__U16_Pad11_, Net__U17_Pad10_, IS_EXM_I, Net__U17_Pad12_,
     Net__U27B_D_);
 

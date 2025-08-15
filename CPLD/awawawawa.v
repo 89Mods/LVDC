@@ -29,7 +29,7 @@ module awawawawa(
     
     output reg SID_CEb = 1,
     output INTERRUPT,
-    output LED,
+    output reg LED,
     
     input clk
 );
@@ -38,7 +38,7 @@ assign RPULSE_OUT = !RPULSE;
 wire radio_read = !IORb && I == 4'b1000;
 wire status_read = !IORb && I == 4'b1110;
 assign BDIR = (!IORb && I == 4'b1010) || status_read || radio_read;
-assign bus = BDIR ? (status_read ? {13'hxx, radio_int_source, key_int_state, timer_int_state} : (radio_read ? radio_word : spi_inbuff)) : 16'hzzzz;
+assign bus = BDIR ? (status_read ? {timer[12:0], radio_int_source, timer_int_state, key_int_state} : (radio_read ? radio_word : spi_inbuff)) : 16'hzzzz;
 
 reg iow_edge = 1;
 wire iow_trigger = iow_edge && !IOWb;
@@ -72,14 +72,15 @@ reg [7:0] MM = 0;
 reg [6:0] R1_DP_states = 0;
 reg [6:0] R2_DP_states = 0;
 
-reg [3:0] disp_step = 0;
-assign SSEL_R1 = disp_step[3:1];
+reg [8:0] disp_step = 0;
+assign SSEL_R1 = disp_step[8:6];
+wire blanking = disp_step[5:3] == 3'b111 || disp_step[5:3] == 3'b000;
 reg [3:0] curr_nibble_r1;
 reg [3:0] curr_nibble_r2;
 reg curr_dp_r1;
 reg curr_dp_r2;
 always @(*) begin
-    case(disp_step[3:1])
+    case(disp_step[8:6])
         0: begin
             curr_nibble_r1 = R1[3:0];
             curr_nibble_r2 = R2[3:0];
@@ -132,6 +133,8 @@ always @(*) begin
 end
 
 always @(*) begin
+	if(blanking) R1_SEGS = 0;
+	else begin
     case(curr_nibble_r1)
         0: R1_SEGS = {curr_dp_r1, 7'b0111111};
         1: R1_SEGS = {curr_dp_r1, 7'b0000110};
@@ -150,6 +153,7 @@ always @(*) begin
         14: R1_SEGS = {curr_dp_r1, 7'b1111001};
         15: R1_SEGS = {curr_dp_r1, 7'b1110001};
     endcase
+	end
 end
 
 always @(*) begin
@@ -176,11 +180,20 @@ end
 reg timer_int_state = 0;
 reg key_int_state = 0;
 reg last_key_state = 1;
-assign INTERRUPT = key_int_state || timer_int_state || radio_int_source;
+wire INTERRUPT_s = (key_int_state || timer_int_state || radio_int_source) && !INT_INHIBIT;
+
+reg INTERRUPT_aligned = 0;
+assign INTERRUPT = INTERRUPT_aligned;
+reg [1:0] clk_align = 0;
+always @(posedge clk) begin
+	clk_align <= clk_align + 1;
+	if(INTERRUPT_s == 0) INTERRUPT_aligned <= 0;
+	else if(clk_align == 1) INTERRUPT_aligned <= 1;
+end
 
 reg timer_active = 0;
-reg [16:0] timer = 0;
-assign LED = timer[16];
+reg [19:0] timer = 3;
+reg [1:0] btn_lat = 0;
 
 always @(posedge clk) begin
 	 iow_edge <= IOWb;
@@ -190,8 +203,12 @@ always @(posedge clk) begin
     last_key_state <= KEY_CLEARb;
     last_rpulse <= RPULSE;
     if(timer_active) begin
-        timer <= timer + 1;
-        if(timer == 17'h1FFFF) timer_int_state <= 1;
+        timer <= {timer[18:0], timer[19] ^ timer[18] ^ timer[15] ^ timer[13]};
+        if(timer == 1) begin
+			timer_int_state <= 1;
+			btn_lat <= {1'b0, btn_lat[1]};
+			LED <= !LED;
+		  end
     end
     if(iow_trigger && I[1]) begin
         case({I[3], I[2], I[0]})
@@ -217,8 +234,9 @@ always @(posedge clk) begin
         endcase
     end
     
-    if(!KEY_CLEARb && last_key_state && !INT_INHIBIT) begin
+    if(!KEY_CLEARb && last_key_state && !btn_lat) begin
         key_int_state <= 1;
+		  btn_lat <= 3;
     end
     
     if(spi_active) begin

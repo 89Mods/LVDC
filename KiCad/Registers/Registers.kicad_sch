@@ -11110,28 +11110,6 @@
 			)
 		)
 	)
-	(global_label "H_CYC_1"
-		(shape input)
-		(at 82.55 101.6 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "958df377-634e-46e2-a1ed-56c32aaef305")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 93.639 101.6 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-				(hide yes)
-			)
-		)
-	)
 	(global_label "DB9"
 		(shape input)
 		(at 36.83 109.22 180)
@@ -17521,6 +17499,73 @@
 			(project "Registers"
 				(path "/bb2d8093-1baa-42e1-9f61-d1b3316cfdc8"
 					(reference "J5")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 82.55 101.6 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "a5d6f4c9-2dc0-4900-90f5-53cec4727ff8")
+		(property "Reference" "#PWR0210"
+			(at 88.9 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 86.36 101.5999 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" ""
+			(at 82.55 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 82.55 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 82.55 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "b8a5c693-217e-426f-bf73-c13e173f83ba")
+		)
+		(instances
+			(project "Registers"
+				(path "/bb2d8093-1baa-42e1-9f61-d1b3316cfdc8"
+					(reference "#PWR0210")
 					(unit 1)
 				)
 			)

@@ -311,9 +311,11 @@ module Registers
    Registers_J2 _J2(A0, A13, A1, A14, GND, A15, A2, A16, A3, A17, A4, GND, A5,
     A18, A6, A19, A7, A20, GND, A21, A8, A22, A9, A23, A10, GND, A11, A24, A12,
     A25);
+    
+    wire bodge = HOPW || TRA;
 
    Registers_J3 _J3(ACCW, A25, nR_A, ACCUM_ZERO, CDS, GND, TRA, CSYLLABLE,
-    INCPC, H_CYC_1, nR_H, HOPW);
+    INCPC, bodge, nR_H, HOPW);
 
    Registers_J4 _J4(HOP_IP0, HOP_IM0, HOP_IP1, HOP_IM1, HOP_IP2, HOP_IM2,
     HOP_IP3, HOP_IS0, HOP_IP4, HOP_IS1, HOP_IP5, HOP_IS2, HOP_IP6, HOP_IS3,
@@ -458,19 +460,19 @@ module Registers
     Net__U39_Px3dR_, Net__U40_Px3dR_);
 
    Registers_U33 _U33(nR_H, HOP_IM1, HOP_IM2, HOP_IS0, HOP_IS1, HOP_IS2,
-    HOP_IS3, CSYLLABLE, HOP_IP0, H_CYC_1, DB7, DB6, DB5, DB4, DB3, DB2, DB1,
+    HOP_IS3, CSYLLABLE, HOP_IP0, bodge, DB7, DB6, DB5, DB4, DB3, DB2, DB1,
     DB0);
 
    Registers_U34 _U34(nR_H, HOP_IP1, HOP_IP2, HOP_IP3, HOP_IP4, HOP_IP5,
-    HOP_IP6, HOP_IP7, HOP_15, H_CYC_1, DB15, DB14, DB13, DB12, DB11, DB10, DB9,
+    HOP_IP6, HOP_IP7, HOP_15, bodge, DB15, DB14, DB13, DB12, DB11, DB10, DB9,
     DB8);
 
    Registers_U35 _U35(nR_H, HOP_DATA_SM, HOP_DM0, HOP_DM1, HOP_DM2, HOP_DS0,
-    HOP_DS1, HOP_DS2, HOP_DS3, H_CYC_1, DB23, DB22, DB21, DB20, DB19, DB18, DB17,
+    HOP_DS1, HOP_DS2, HOP_DS3, bodge, DB23, DB22, DB21, DB20, DB19, DB18, DB17,
     DB16);
 
    Registers_U36 _U36(nR_H, HOP_INSTR_SM, GND, GND, GND, GND, HOP_IM0, plus6V,
-    plus6V, H_CYC_1, unconnected__U36_Q7_Pad12_, unconnected__U36_Q6_Pad13_, DB25,
+    plus6V, bodge, unconnected__U36_Q7_Pad12_, unconnected__U36_Q6_Pad13_, DB25,
     unconnected__U36_Q4_Pad15_, Net__U36_Q3_, unconnected__U36_Q2_Pad17_,
     unconnected__U36_Q1_Pad18_, DB24);
 

@@ -5,18 +5,37 @@ import java.nio.channels.FileChannel;
 public class ToVerilogHex {
 	public static void main(String[] args) {
 		try {
-			if(args.length < 2) {
-				System.out.println("ToFlashImage [infile] [outfile]");
+			if(args.length < 1) {
+				System.out.println("ToFlashImage [outfile]");
 				System.exit(1);
 			}
+			byte[] bootSec = new byte[6 * 4096 * 4]; //24576 words
+			for(int i = 0; i < bootSec.length; i++) bootSec[i] = 0;
 			int limit = 4 * 1024 * 1024;
 			byte[] image = new byte[limit];
-			FileChannelInputStream fis = new FileChannelInputStream(new File(args[0]));
-			fis.read(image);
+			
+			FileChannelInputStream fis = new FileChannelInputStream(new File("toplevel.bin"));
+			fis.read(bootSec, 0, 4096 * 4 * 6);
 			fis.close();
+			//Major mode flash address computed as:
+			//(MM << 16) + 98304
+			//on 4MiB flash, max MM is 0x3E
+			
 			//This is for use with the spiflash, which is logically split into 8-bit bytes. Best way to use it here is to split it into 32-bit words of which only 26 bits are used.
+			for(int i = 0; i < bootSec.length; i++) image[i] = bootSec[i];
+			
+			for(int i = 0; i < 0x3F; i++) {
+				String filename = "mm" + Integer.toHexString(i) + ".bin";
+				File f = new File(filename);
+				if(!f.exists()) continue;
+				System.out.println("Found " + filename);
+				fis = new FileChannelInputStream(f);
+				fis.read(image, bootSec.length + i * 4096 * 4, 4096 * 4);
+				fis.close();
+			}
+			
 			FileChannelOutputStream fos = new FileChannelOutputStream(new File("spiflash.bin"));
-			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileChannelOutputStream(new File(args[1]))));
+			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileChannelOutputStream(new File(args[0]))));
 			for(int i = 0; i < image.length; i+=4) {
 				bw.write(String.format("%02x ", image[i+3]));
 				bw.write(String.format("%02x ", image[i+2]));
