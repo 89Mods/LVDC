@@ -1,13 +1,14 @@
 # LVDC
 Replica of the [Launch Vehicle Digital Computer](https://www.ibiblio.org/apollo/LVDC.html) using 74-series logic. This projects only aims to keep the CPU Architecture binary-compatible with the original. Implementation details, IO Peripherals and Software are all originally created by me. This is party due to the fact that detailed hardware descriptions (i.e. schematics) are not as abundant for the LVDC as for the AGC, but also because this project doubled as a challenge to myself to implement such an odd instruction set, but using every trick I’ve learned from my years of engineering integrated circuit layouts. It turns out that applying nanoscale engineering tricks to a macroscale discrete logic build can work out quite well. The clock speed of this computer is 2.5MHz, but it can probably go faster.
 
-This LVDC is accurate to the original in sense that it executes the same instructions in the same way, has the same memory layout (including special locations like HOP save and MQ) and can execute snippets of original LVDC code.
+This LVDC is accurate to the original in the sense that it executes the same instructions that function the exact same, has the same memory layout (including special locations like HOP save and MQ) and can execute snippets of original LVDC code.
 
 The differences are:
   - This computer is parallel and not bit-serial, and is also microcoded
   - It is implemented using 74-series logic and not discrete transistors (I wish to be able to take it with me to events, so it couldn’t get too big)
   - Everything hooked up to the PIO (IO read/write) instruction is my own invention, with the exception of the the interrupt latch clear IO location, which it shares with the original LVDC
   - Instruction cycles times are much faster, probably on an order of magnitude or more
+  - The hardware multiply/divide circuitry (as designed so far) does NOT share the inacuracies in low-order bits as the original LVDC, instead always producing the 100% correct result
 
 Infact, I took the most liberties with the IO Card, which contains various modern components hooked into the CPU’s IO Bus. Its mostly a random mashup of things I thought would be cool (there is even a Commodore SID replica in there) to demonstrate the computer with.
 
@@ -17,8 +18,9 @@ Software wise, things are still WiP. Two ROMs provide just enough storage for a 
 
 **Known Issues:**
   - The HOP Save feature is bugged. The Instruction Pointer in the stored value is off by one. Trying to return with it will return execution to the transfer or HOP instruction that started the subroutine call, not the one following it, triggering an infinite loop. Fixed for now in software by modifying the saved value before return.
-  - While all schematic files have been updated with fixed to other problems discovered post-production, the schematic layout for the Control board still need to be redone.
-  - The EXM instruction has only been minimally tested because I don’t understand how it is useful (thing takes up half a dozen or more ICs just to handle weird edge cases caused by it and I’m still left scratching my head on how I’m supposed to use it).
+  - While all schematic files have been updated with fixes to additional problems discovered post-production, the schematic layout for the Control board still need to be redone.
+  - The EXM instruction has only been minimally tested because I don’t understand how it is useful (thing takes up half a dozen ICs just to handle weird edge cases caused by it and I’m still left scratching my head on how I’m supposed to use it).
+  - The hardware multiply/divide functionality has yet to be physically implemented. In `LVDC.circ` you can see that I have designed it, but I’ve yet to translate this to a PCB design because I couldn’t get it made yet anyways (its the most expensive part of the whole computer).
 
 # Repository Structure
 
