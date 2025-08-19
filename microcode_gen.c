@@ -57,6 +57,7 @@ void instr_simple(uint8_t opcode, uint8_t step, uint16_t signals) {
 	res[step + (opcode << 3) + ACCUM_NEG + A9] = signals;
 	res[step + (opcode << 3) + ACCUM_NEG + A8] = signals;
 	res[step + (opcode << 3) + ACCUM_NEG + A8 + A9] = signals;
+	res[step + (opcode << 3) + ACCUM_NEG + ACCUM_ZERO] = signals;
 	res[step + (opcode << 3) + ACCUM_NEG + ACCUM_ZERO + A9] = signals;
 	res[step + (opcode << 3) + ACCUM_NEG + ACCUM_ZERO + A8] = signals;
 	res[step + (opcode << 3) + ACCUM_NEG + ACCUM_ZERO + A8 + A9] = signals;
@@ -131,9 +132,9 @@ int main(void) {
 	instr_simple(0x9, STEP_3, INC_PC);
 	
 	//RSU
-	instr_simple(0xD, STEP_1, MEM_RD);
-	instr_simple(0xD, STEP_2, ALU_OUTPUT | ACCUM_WRITE);
-	instr_simple(0xD, STEP_3, INC_PC);
+	instr_simple(0xD, STEP_1, MEM_RD | ALU_SWAPOPS);
+	instr_simple(0xD, STEP_2, ALU_OUTPUT | ACCUM_WRITE | ALU_SWAPOPS);
+	instr_simple(0xD, STEP_3, INC_PC | ALU_SWAPOPS);
 	
 	//CLA
 	instr_simple(0xF, STEP_1, MEM_RD);

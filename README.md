@@ -21,6 +21,7 @@ Software wise, things are still WiP. Two ROMs provide just enough storage for a 
   - While all schematic files have been updated with fixes to additional problems discovered post-production, the schematic layout for the Control board still need to be redone.
   - The EXM instruction has only been minimally tested because I don’t understand how it is useful (thing takes up half a dozen ICs just to handle weird edge cases caused by it and I’m still left scratching my head on how I’m supposed to use it).
   - The hardware multiply/divide functionality has yet to be physically implemented. In `LVDC.circ` you can see that I have designed it, but I’ve yet to translate this to a PCB design because I couldn’t get it made yet anyways (its the most expensive part of the whole computer).
+  - The interrupt logic sometimes does not reset properly and I don’t understand why
 
 # Repository Structure
 
