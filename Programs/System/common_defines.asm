@@ -1,7 +1,7 @@
 io_write_base equ 0
 io_read_base equ 1<<8
 
-; Global space memory layout
+; Global spare memory layout
 spare_mod equ 0
 spare_sec equ 14
 ; Display values from command
@@ -21,9 +21,18 @@ cmd_act equ 9
 entry_mode equ 10
 gpio_mirror equ 11
 curr_mm equ 12
+cmd_state equ 13
+next_cmd equ 14
+system_timer equ 15
 ; Some constant values
-const_gr_flash_csb equ 13
-const_all_ones equ 14
+const_gr_flash_csb equ 16
+const_all_ones equ 17
+; Subroutine return values
+sub_ret equ 18
+
+cmd_state_initial equ 0
+cmd_state_running equ 1
+cmd_state_final equ 2
 
 cdsspare macro
 	CDSS spare_mod,spare_sec
@@ -48,7 +57,33 @@ radio_read equ io_read_base + (%1000)
 status_read equ io_read_base + (%1110)
 spi_din equ io_read_base + (%1010)
 gpio_out equ io_write_base + (%0101)
-gpio_in equ io_read_base + (%0101)
+gpio_in0 equ io_read_base + (%1101)
+; 128 - KEY_7
+; 64 - KEY_6
+; 32 - KEY_5
+; 16 - KEY_4
+; 8 - KEY_3
+; 4 - KEY_2
+; 2 - KEY_1
+; 1 - KEY_0
+gpio_in1 equ io_read_base + (%0101)
+; 128 - KEY_F
+; 64 - KEY_E
+; 32 - KEY_D
+; 16 - KEY_C
+; 8 - KEY_B
+; 4 - KEY_A
+; 2 - KEY_9
+; 1 - KEY_8
+gpio_in2 equ io_read_base + (%0001)
+; 128 - GPI4
+; 64 - GPI3
+; 32 - GPI2
+; 16 - GPI1
+; 8 - GPI0
+; 4 - KEY_MINUS
+; 2 - KEY_CLEAR
+; 1 - KEY_ENTER
 
 cpld_regs_base_write equ io_write_base + (%0010)
 r1_lo equ cpld_regs_base_write + (%0000)

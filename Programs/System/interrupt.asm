@@ -60,6 +60,11 @@ curr_sec equ 1
 	org (curr_sec<<8)|(curr_mod<<12)
 	dd 0 ; Spacer for interrupt vector
 trupt_handler:
+	CLA one
+	cdsspare
+	ADD @system_timer
+	STO @system_timer
+	cdscurr
 
 	; UPDATE DISPLAY
 	; Toggle blink_state every few interrupts
@@ -119,8 +124,50 @@ selfmod_2:
 	CLA @0
 	cdscurr
 	STO r_s_temp
+
+	cdsspare
+	CLA @gpio_mirror
+	cdscurr
+	AND gpio_clr_signs
+	STO temp
 	
-	; TODO: prepare_regs_signed
+	CLA r_s_temp
+	AND one
+	TNZ r1_is_signed
+	TRA r1_is_not_signed
+r1_is_signed:
+	CLA r1_temp
+	AND msb
+	XOR msb
+	TNZ r1_is_not_signed
+	CLA temp
+	ADD gpio_sign_r1
+	STO temp
+	CL
+	SUB one
+	XOR r1_temp
+	ADD one
+	STO r1_temp
+r1_is_not_signed:
+	CLA one
+	SHL 1
+	AND r_s_temp
+	TNZ r2_is_signed
+	TRA r2_is_not_signed
+r2_is_signed:
+	CLA r2_temp
+	AND msb
+	XOR msb
+	TNZ r2_is_not_signed
+	CLA temp
+	ADD gpio_sign_r2
+	STO temp
+	CL
+	SUB one
+	XOR r2_temp
+	ADD one
+	STO r2_temp
+r2_is_not_signed:
 	
 	CLA r1_temp
 	PIO r1_lo
@@ -146,7 +193,35 @@ selfmod_2:
 	SHR 2
 	PIO r2_hi
 
-	; TODO: blink effects
+	CLA blink_state
+	TNZ skip_blink
+	CLA one
+	SHL 2
+	AND r_s_temp
+	TNZ r1_blink
+	TRA r1_no_blink
+r1_blink:
+	CL
+	SUB one
+	XOR gpio_sign_r1
+	AND temp
+	ADD gpio_sign_r1
+	STO temp
+r1_no_blink:
+	CLA one
+	SHL 1
+	SHL 2
+	AND r_s_temp
+	TNZ r2_blink
+	TRA skip_blink
+r2_blink:
+	CL
+	SUB one
+	XOR gpio_sign_r2
+	AND temp
+	ADD gpio_sign_r2
+	STO temp
+skip_blink:
 	
 	cdsspare
 	CLA @curr_mm
@@ -157,6 +232,11 @@ selfmod_2:
 	SHL 2
 	ADD mm_change
 	PIO settings_reg
+	
+	CLA temp
+	cdsspare
+	STO @gpio_mirror
+	PIO gpio_out
 	
 	CDSS 2,0
 	CLA @clear_trupt
@@ -187,6 +267,16 @@ offset_one:
 	dd 1<<5
 indexed_base:
 	CLA @0
+gpio_clr_signs:
+	dd ~(gr_sign_r2 | gr_sign_r1)
+gpio_sign_r1:
+	dd gr_sign_r1
+gpio_sign_r2:
+	dd gr_sign_r2
+temp:
+	dd 0
+msb:
+	dd 1<<25
 
 	ENDSECTION
 
@@ -196,6 +286,8 @@ curr_mod equ 2
 curr_sec equ 2
 	org (curr_sec<<8)|(curr_mod<<12)
 keyrupt_handler:
+
+	HOP* cmd_entry_reset
 
 	CDSS 2,0
 	CLA @clear_keyrupt

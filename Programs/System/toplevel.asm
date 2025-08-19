@@ -2,3 +2,4 @@
 	include "interrupt.asm"
 	include "system.asm"
 	include "commands.asm"
+	include "utils.asm"
