@@ -101,22 +101,24 @@ ttl_74hc244 U6(
 	.OE2b(GPIO_READb)
 );
 
+wire BODGE1;
 ttl_74hc244 U26(
 	.A1(4'h0),
 	.A2(4'h0),
 	.Y1(DB[3:0]),
 	.Y2(DB[7:4]),
-	.OE1b(GPIO_READb),
-	.OE2b(GPIO_READb)
+	.OE1b(BODGE1),
+	.OE2b(BODGE1)
 );
 
+wire BODGE0;
 ttl_74hc244 U25(
 	.A1(4'h0),
 	.A2(4'h0),
 	.Y1(DB[3:0]),
 	.Y2(DB[7:4]),
-	.OE1b(GPIO_READb),
-	.OE2b(GPIO_READb)
+	.OE1b(BODGE0),
+	.OE2b(BODGE0)
 );
 
 wire SIGN_R2;
@@ -178,13 +180,16 @@ awawawawa CPLD(
 	.SDI(SDI),
 	.SCK_FLASH(SCK_FLASH),
 	.SCK_LED1(),
-	.SCK_LED2(),
 	
 	.SID_CEb(),
 	.INTERRUPT(V3_INTERRUPT),
 	.LED(LED),
+	.BODGE0(BODGE0),
+	.BODGE1(BODGE1),
 	
-	.clk(V3_clockin)
+	.clk(V3_clockin),
+	
+	.TEMP(1'b0)
 );
 
 tri1 io2;

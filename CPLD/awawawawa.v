@@ -20,17 +20,23 @@ module awawawawa(
     output [2:0] SSEL_R1,
     output reg [7:0] R1_SEGS = 0,
     output reg [7:0] R2_SEGS = 0,
+	 
+	 input TEMP,
+	 output reg SCL = 1'b1,
+	 output reg SDA = 1'b1,
     
     output reg SDO = 0,
     input SDI,
     output SCK_FLASH,
     output SCK_LED1,
-    output SCK_LED2,
     
     output reg SID_CEb = 1,
     output INTERRUPT,
     output reg LED,
     
+	 output BODGE0,
+	 output BODGE1,
+	 
     input clk
 );
 assign RPULSE_OUT = !RPULSE;
@@ -38,7 +44,7 @@ assign RPULSE_OUT = !RPULSE;
 wire radio_read = !IORb && I == 4'b1000;
 wire status_read = !IORb && I == 4'b1110;
 assign BDIR = (!IORb && I == 4'b1010) || status_read || radio_read;
-assign bus = BDIR ? (status_read ? {timer[12:0], radio_int_source, timer_int_state, key_int_state} : (radio_read ? radio_word : spi_inbuff)) : 16'hzzzz;
+assign bus = BDIR ? (status_read ? {timer[11:0], TEMP, radio_int_source, timer_int_state, key_int_state} : (radio_read ? radio_word : spi_inbuff)) : 16'hzzzz;
 
 reg iow_edge = 1;
 wire iow_trigger = iow_edge && !IOWb;
@@ -48,6 +54,8 @@ wire GPIO_LOAD_condition = !IOWb && I == 4'b0101;
 assign GPIO_LOAD = !GPIO_LOAD_edge && GPIO_LOAD_condition;
 
 assign GPIO_READb = !(!IORb && I == 4'b0101);
+assign BODGE0 = !(!IORb && I == 4'b1101);
+assign BODGE1 = !(!IORb && I == 4'b0001);
 
 reg SCK = 0;
 reg [7:0] spi_outbuff = 0;
@@ -57,7 +65,6 @@ wire spi_active = spi_step != 0;
 reg [2:0] which_spi = 0;
 assign SCK_FLASH = SCK & which_spi[0];
 assign SCK_LED1 = SCK & which_spi[1];
-assign SCK_LED2 = SCK & which_spi[2];
 
 reg [15:0] radio_word = 0;
 reg last_rpulse = 0;
@@ -119,7 +126,7 @@ always @(*) begin
         end
         6: begin
             curr_nibble_r1 = {2'b00, R1[25:24]};
-            curr_nibble_r2 = {2'b00, R1[25:24]};
+            curr_nibble_r2 = {2'b00, R2[25:24]};
             curr_dp_r1 = R1_DP_states[6];
             curr_dp_r2 = R2_DP_states[6];
         end
@@ -217,7 +224,11 @@ always @(posedge clk) begin
             2: R2[15:0] <= bus;
             3: R2[25:16] <= bus[9:0];
             4: begin
-                if(spi_step == 0) begin
+				    if(bus[15]) begin
+					 SDA <= bus[0];
+					 SCL <= bus[1];
+					 end
+                else if(spi_step == 0) begin
                     spi_step <= 1;
                     spi_outbuff <= bus[7:0];
                     which_spi <= bus[10:8];

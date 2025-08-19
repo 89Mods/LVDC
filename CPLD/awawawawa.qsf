@@ -63,7 +63,7 @@ set_location_assignment PIN_40 -to INT_INHIBIT
 set_location_assignment PIN_2 -to IORb
 set_location_assignment PIN_3 -to IOWb
 set_location_assignment PIN_37 -to KEY_CLEARb
-set_location_assignment PIN_86 -to LED
+set_location_assignment PIN_41 -to LED
 set_location_assignment PIN_69 -to R1_SEGS[7]
 set_location_assignment PIN_68 -to R1_SEGS[6]
 set_location_assignment PIN_67 -to R1_SEGS[5]
@@ -89,7 +89,6 @@ set_location_assignment PIN_5 -to RPULSE
 set_location_assignment PIN_82 -to RPULSE_OUT
 set_location_assignment PIN_100 -to SCK_FLASH
 set_location_assignment PIN_97 -to SCK_LED1
-set_location_assignment PIN_96 -to SCK_LED2
 set_location_assignment PIN_99 -to SDI
 set_location_assignment PIN_98 -to SDO
 set_location_assignment PIN_1 -to SID_CEb
@@ -120,3 +119,5 @@ set_global_assignment -name ENABLE_BOOT_SEL_PIN OFF
 set_global_assignment -name USE_CONFIGURATION_DEVICE ON
 set_global_assignment -name RESERVE_ALL_UNUSED_PINS "AS INPUT TRI-STATED WITH WEAK PULL-UP"
 set_global_assignment -name ENABLE_DEVICE_WIDE_RESET ON
+set_location_assignment PIN_86 -to BODGE0
+set_location_assignment PIN_96 -to BODGE1
