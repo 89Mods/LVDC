@@ -8,10 +8,13 @@ toplevel.p: toplevel.asm interrupt.asm commands.asm system.asm
 mm0.p: mm0.asm
 	$(ASL) -L -cpu $(ARCH) $<
 
+mm9.p: mm9.asm
+	$(ASL) -L -cpu $(ARCH) $<
+
 %.bin: %.p
 	$(P2BIN) -l 0 $<
 
-system: toplevel.bin mm0.bin
+system: toplevel.bin mm0.bin mm9.bin
 	java ToFlashImage.java ../../Bench/flash.txt
 
 flash: system

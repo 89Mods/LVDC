@@ -4,11 +4,21 @@
 	PUBLIC clear_keyrupt
 	PUBLIC clear_rrupt
 	PUBLIC interrupt_handler_loop_hopc
+	PUBLIC temp_tripped
 curr_mod equ 2
 curr_sec equ 0
 	org (curr_sec<<8)|(curr_mod<<12)
 interrupt:
 	STO +hop_save
+	
+	cdscurr
+	PIO status_read
+	AND temp_bit
+	XOR temp_bit
+	TNZ irupt_no_temp
+	CLA temp_bit
+	STO temp_tripped
+irupt_no_temp:
 	
 	; Lets see - why are we here?
 	; Loop until there are no more interrupts left to handle
@@ -23,6 +33,8 @@ interrupt_handler_loop:
 	PIO status_read
 	AND clear_rrupt
 	TNZ enter_rrupt_handler
+	CLA temp_tripped
+	TNZ enter_temp_handler
 	TRA iret
 enter_trupt_handler:
 	HOP* trupt_handler
@@ -30,6 +42,8 @@ enter_keyrupt_handler:
 	HOP* keyrupt_handler
 enter_rrupt_handler:
 	HOP* rrupt_handler
+enter_temp_handler:
+	HOP* temp_handler
 
 iret:
 	CLA bugfix
@@ -41,13 +55,16 @@ iret:
 	HOP +0
 bugfix:
 	dd 1<<7
-
+temp_tripped:
+	dd 0
 clear_trupt:
 	dd (1 << 1)
 clear_keyrupt:
 	dd (1 << 0)
 clear_rrupt:
 	dd (1 << 2)
+temp_bit:
+	dd (1 << 3)
 interrupt_handler_loop_hopc:
 	HOPC interrupt_handler_loop, curr_mod, curr_sec
 
@@ -191,6 +208,15 @@ r2_is_not_signed:
 	SHR 2
 	SHR 2
 	SHR 2
+	STO temp2
+	CLA r_s_temp
+	AND dp_bits_mask
+	SHL 2
+	SHL 2
+	SHL 2
+	SHL 2
+	SHL 2
+	ADD temp2
 	PIO r2_hi
 
 	CLA blink_state
@@ -275,24 +301,77 @@ gpio_sign_r2:
 	dd gr_sign_r2
 temp:
 	dd 0
+temp2:
+	dd 0
+dp_bits_mask:
+	dd $3<<4
 msb:
 	dd 1<<25
+temp_tripped:
+	dd 0
 
 	ENDSECTION
 
-	SECTION keyrupt_handler
+	SECTION keyrupt_temp_handlers
 	PUBLIC keyrupt_handler
+	PUBLIC temp_handler
 curr_mod equ 2
 curr_sec equ 2
 	org (curr_sec<<8)|(curr_mod<<12)
 keyrupt_handler:
 
-	HOP* cmd_entry_reset
-
 	CDSS 2,0
 	CLA @clear_keyrupt
 	PIO settings_reg
-	HOP @interrupt_handler_loop_hopc
+	cdscurr
+
+	HOP* cmd_entry_reset
+
+temp_handler:
+	STO +hop_save
+	
+	CLA last_time
+	cdsspare
+	RSU @system_timer
+	cdscurr
+	TNZ temp_update_lamps
+	TRA temp_not_last_time
+temp_update_lamps:
+	CLA temp_lamp_bit
+	cdsspare
+	XOR @const_all_ones
+	AND @gpio_mirror
+	cdscurr
+	ADD temp_lamp_bit
+	cdsspare
+	STO @gpio_mirror
+	PIO gpio_out
+	CLA @system_timer
+	cdscurr
+	STO last_time
+temp_not_last_time:
+	
+	cdsspare
+	CLA @system_timer
+	SHR 2
+	cdscurr
+	AND and_vals
+	STO sid_step
+	
+	CLA +hop_save
+	ADD bugfix
+	STO +0
+	HOP +0
+bugfix:
+	dd 1<<7
+sid_step:
+	dd 0
+last_time:
+	dd 0
+and_vals:
+	dd $0F
+temp_lamp_bit:
+	dd gr_lamp_temp
 
 	ENDSECTION
 

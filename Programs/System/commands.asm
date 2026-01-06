@@ -15,7 +15,6 @@ load_mm_flash:
 	SHL 2
 	SHL 2
 	SHL 2
-	SHL 2
 	ADD flash_offset
 	STO temp
 	cdsspare
@@ -189,6 +188,7 @@ weh:
 	PUBLIC cmd_entry_update
 	PUBLIC curr_keys
 	PUBLIC curr_keys_diff
+	PUBLIC curr_keys_diff_filtered
 	PUBLIC keys_mod
 	PUBLIC keys_sec
 keys_mod equ 4
@@ -201,7 +201,6 @@ curr_sec equ keys_sec
 	; Enter entry mode, clear R1, R2
 	; Set to enter into R2 (Verb) initially
 cmd_entry_reset:
-	STO +hop_save
 	CLA initial_r_s
 	cdsspare
 	STO @entry_mode ; Any non-zero value with a zero in the LSB will do
@@ -213,7 +212,7 @@ cmd_entry_reset:
 	cdscurr
 	STO entry_timeout
 	
-	HOP* cmds_ret
+	HOP* interrupt_handler_loop
 four:
 	dd 4
 initial_r_s:
@@ -258,6 +257,8 @@ cmd_entry_update:
 	XOR curr_keys
 	AND curr_keys
 	STO curr_keys_diff
+	CL
+	STO curr_keys_diff_filtered
 	
 	; Skip entry parsing if not in entry mode
 	cdsspare
@@ -265,6 +266,8 @@ cmd_entry_update:
 	cdscurr
 	STO entry_mode_cpy
 	TNZ parse_keys
+	CLA curr_keys_diff
+	STO curr_keys_diff_filtered
 	TRA update_skip
 parse_keys:
 	; Timeout
@@ -473,6 +476,8 @@ curr_keys:
 	dd 0
 curr_keys_diff:
 	dd 0
+curr_keys_diff_filtered:
+	dd 0
 last_keys:
 	dd 0
 one:
@@ -505,7 +510,7 @@ gpio_inv_mask:
 entry_timeout:
 	dd 0
 entry_timeout_len:
-	dd 200
+	dd 180
 	ENDSECTION
 
 	SECTION cmd_table
@@ -524,7 +529,9 @@ cmd_hop_table:
 	dd 0,0,0,0,0,0,0,0 ; 8
 	
 	dd 0,0,0,0,0,0,0,0 ; 16
-	dd 0,0,0,0,0,0,0,0 ; 24
+	dd 0,0,0,0
+	HOPC cmd1c_entry
+	dd 0,0,0 ; 24
 	
 	dd 0,0,0,0,0,0
 	HOPC cmd26_entry
@@ -576,8 +583,8 @@ cmd_hop_table:
 	PUBLIC cmd01_entry
 	PUBLIC cmd26_entry
 	PUBLIC cmd35_entry
-	PUBLIC cmd_a2_entry
 	PUBLIC cmd_ff_entry
+	PUBLIC cmd1c_entry
 curr_mod equ 4
 curr_sec equ 3
 	org (curr_sec<<8)|(curr_mod<<12)
@@ -594,6 +601,30 @@ cmd01_entry:
 	cdscurr
 	
 	HOP* cmds_ret
+	
+	; VERB 1C
+	; Reset Alarms
+cmd1c_entry:
+	STO +hop_save
+	
+	CDSS 2,0
+	CL
+	STO @temp_tripped
+	cdsspare
+	STO @cmd_act
+	STO @next_cmd
+	cdscurr
+	CLA temp_lamp_mask
+	cdsspare
+	AND @gpio_mirror
+	STO @gpio_mirror
+	PIO gpio_out
+	PIO gpio_out
+	cdscurr
+	
+	HOP* cmds_ret
+temp_lamp_mask:
+	dd ~gr_lamp_temp
 
 	; VERB 26
 	; Monitor memory location
@@ -625,7 +656,7 @@ cmd26_entry:
 	TRA cmd26_ret
 cmd26_not_initial:
 	CDSS keys_mod,keys_sec
-	CLA @curr_keys_diff
+	CLA @curr_keys_diff_filtered
 	cdscurr
 	STO temp
 	AND key_enter
@@ -774,7 +805,7 @@ cmd35_continue:
 	TNZ cmd35_not_final
 	TRA cmd35_exit
 cmd35_not_final:
-	CLA cmd35_blink_both
+	CLA cmd35_blink_both_all_dp
 	cdsspare
 	STO @r_s_cmd
 	cdscurr
@@ -794,31 +825,14 @@ lamp_test_val:
 	dd $3888888
 cmd35_len:
 	dd 56
-cmd35_blink_both:
-	dd 12
+cmd35_blink_both_all_dp:
+	dd 12+($3<<4)
 two:
 	dd 2
 cmd35_gpio_mask:
 	dd gr_lamp_temp+gr_lamp_restart+gr_lamp_opr_err
 cmd35_comp_acty:
 	dd gr_lamp_comp_acty
-
-	; VERB A2
-	; Change Major Mode
-cmd_a2_entry:
-	STO +hop_save
-	CLA +hop_save
-	ADD bugfix
-	STO return_backup
-	cdsspare
-	CLA @r1_ent
-	cdscurr
-	AND mm_check_mask
-	TNZ cmd26_fail
-	
-	HOP cmd26_ret
-mm_check_mask:
-	dd ~$FF
 
 	; VERB FF
 	; Soft reset
@@ -833,4 +847,62 @@ timer_deact:
 i_set:
 	dd gr_int_inhibit
 
+	ENDSECTION
+
+	SECTION cmds1
+	PUBLIC cmd_a2_entry
+curr_mod equ 4
+curr_sec equ 4
+	org (curr_sec<<8)|(curr_mod<<12)
+	; VERB A2
+	; Change Major Mode
+cmd_a2_entry:
+	STO +hop_save
+	CLA +hop_save
+	ADD bugfix
+	STO return_backup
+	cdsspare
+	CLA @r1_ent
+	cdscurr
+	STO temp
+	SUB mm_check_max
+	TMI cmd_a2_okay
+	TRA cmd_a2_fail
+cmd_a2_okay:
+	CLA cmda2_comp_acty_mask
+	cdsspare
+	AND @gpio_mirror
+	STO @gpio_mirror
+	PIO gpio_out
+	cdscurr
+	CLA temp
+	HOP* load_mm_flash ; Load MM code - TODO: no way yet to cleanly exit a Major Mode
+	CLA cmda2_comp_acty
+	HOP* gpio_set
+cmda2_ret:
+	cdsspare
+	CL
+	STO @cmd_act
+	STO @next_cmd
+	cdscurr
+	HOP return_backup
+cmd_a2_fail:
+	CLA cmda2_opr_err
+	HOP* gpio_set
+	TRA cmda2_ret
+mm_check_max:
+	dd $3E
+temp:
+	dd 0
+bugfix:
+	dd 1<<7
+return_backup:
+	dd 0
+cmda2_opr_err:
+	dd gr_lamp_opr_err
+cmda2_comp_acty:
+	dd gr_lamp_comp_acty
+cmda2_comp_acty_mask:
+	dd ~gr_lamp_comp_acty
+	
 	ENDSECTION

@@ -50,7 +50,7 @@ loop:
 	;PIO gpio_out
 	;cdscurr
 	;TRA delay_sub
-	TRA inc_counter
+	;TRA inc_counter
 	;CLA initial_gpio
 	;cdsspare
 	;STO @gpio_mirror

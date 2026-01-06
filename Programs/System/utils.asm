@@ -31,6 +31,7 @@ bugfix:
 indirect_load:
 	; Address to load from in acc
 	STO +hop_save
+	STO temp
 	SHR 2
 	SHR 2
 	SHR 2

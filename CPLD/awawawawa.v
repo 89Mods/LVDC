@@ -18,8 +18,8 @@ module awawawawa(
     input INT_INHIBIT,
     input [3:0] I,
     output [2:0] SSEL_R1,
-    output reg [7:0] R1_SEGS = 0,
-    output reg [7:0] R2_SEGS = 0,
+    output reg [7:0] R1_SEGS,
+    output reg [7:0] R2_SEGS,
 	 
 	 input TEMP,
 	 output reg SCL = 1'b1,
@@ -44,7 +44,7 @@ assign RPULSE_OUT = !RPULSE;
 wire radio_read = !IORb && I == 4'b1000;
 wire status_read = !IORb && I == 4'b1110;
 assign BDIR = (!IORb && I == 4'b1010) || status_read || radio_read;
-assign bus = BDIR ? (status_read ? {timer[11:0], TEMP, radio_int_source, timer_int_state, key_int_state} : (radio_read ? radio_word : spi_inbuff)) : 16'hzzzz;
+assign bus = BDIR ? (status_read ? {12'hxxx, TEMP, radio_int_source, timer_int_state, key_int_state} : (radio_read ? radio_word : spi_inbuff)) : 16'hzzzz;
 
 reg iow_edge = 1;
 wire iow_trigger = iow_edge && !IOWb;
@@ -62,7 +62,7 @@ reg [7:0] spi_outbuff = 0;
 reg [15:0] spi_inbuff = 0;
 reg [4:0] spi_step = 0;
 wire spi_active = spi_step != 0;
-reg [2:0] which_spi = 0;
+reg [1:0] which_spi = 0;
 assign SCK_FLASH = SCK & which_spi[0];
 assign SCK_LED1 = SCK & which_spi[1];
 
@@ -76,8 +76,7 @@ reg radio_int_source = 0;
 reg [25:0] R1 = 0;
 reg [25:0] R2 = 0;
 reg [7:0] MM = 0;
-reg [6:0] R1_DP_states = 0;
-reg [6:0] R2_DP_states = 0;
+reg [1:0] DP_enables = 0;
 
 reg [8:0] disp_step = 0;
 assign SSEL_R1 = disp_step[8:6];
@@ -91,44 +90,44 @@ always @(*) begin
         0: begin
             curr_nibble_r1 = R1[3:0];
             curr_nibble_r2 = R2[3:0];
-            curr_dp_r1 = R1_DP_states[0];
-            curr_dp_r2 = R2_DP_states[0];
+            curr_dp_r1 = 1'b0;
+            curr_dp_r2 = 1'b0;
         end
         1: begin
             curr_nibble_r1 = R1[7:4];
             curr_nibble_r2 = R2[7:4];
-            curr_dp_r1 = R1_DP_states[1];
-            curr_dp_r2 = R2_DP_states[1];
+            curr_dp_r1 = 1'b0;
+            curr_dp_r2 = 1'b0;
         end
         2: begin
             curr_nibble_r1 = R1[11:8];
             curr_nibble_r2 = R2[11:8];
-            curr_dp_r1 = R1_DP_states[2];
-            curr_dp_r2 = R2_DP_states[2];
+            curr_dp_r1 = 1'b0;
+            curr_dp_r2 = 1'b0;
         end
         3: begin
             curr_nibble_r1 = R1[15:12];
             curr_nibble_r2 = R2[15:12];
-            curr_dp_r1 = R1_DP_states[3];
-            curr_dp_r2 = R2_DP_states[3];
+            curr_dp_r1 = DP_enables[0];
+            curr_dp_r2 = DP_enables[1];
         end
         4: begin
             curr_nibble_r1 = R1[19:16];
             curr_nibble_r2 = R2[19:16];
-            curr_dp_r1 = R1_DP_states[4];
-            curr_dp_r2 = R2_DP_states[4];
+            curr_dp_r1 = 1'b0;
+            curr_dp_r2 = 1'b0;
         end
         5: begin
             curr_nibble_r1 = R1[23:20];
             curr_nibble_r2 = R2[23:20];
-            curr_dp_r1 = R1_DP_states[5];
-            curr_dp_r2 = R2_DP_states[5];
+            curr_dp_r1 = 1'b0;
+            curr_dp_r2 = 1'b0;
         end
         6: begin
             curr_nibble_r1 = {2'b00, R1[25:24]};
             curr_nibble_r2 = {2'b00, R2[25:24]};
-            curr_dp_r1 = R1_DP_states[6];
-            curr_dp_r2 = R2_DP_states[6];
+            curr_dp_r1 = 1'b0;
+            curr_dp_r2 = 1'b0;
         end
         7: begin
             curr_nibble_r1 = MM[3:0];
@@ -164,6 +163,8 @@ always @(*) begin
 end
 
 always @(*) begin
+	//if(blanking) R2_SEGS = 0;
+	//else begin
     case(curr_nibble_r2)
         0: R2_SEGS = {curr_dp_r2, 7'b0111111};
         1: R2_SEGS = {curr_dp_r2, 7'b0000110};
@@ -182,6 +183,7 @@ always @(*) begin
         14: R2_SEGS = {curr_dp_r2, 7'b1111001};
         15: R2_SEGS = {curr_dp_r2, 7'b1110001};
     endcase
+	 //end
 end
 
 reg timer_int_state = 0;
@@ -222,7 +224,10 @@ always @(posedge clk) begin
             0: R1[15:0] <= bus;
             1: R1[25:16] <= bus[9:0];
             2: R2[15:0] <= bus;
-            3: R2[25:16] <= bus[9:0];
+            3: begin
+					R2[25:16] <= bus[9:0];
+					DP_enables <= bus[15:14];
+				end
             4: begin
 				    if(bus[15]) begin
 					 SDA <= bus[0];

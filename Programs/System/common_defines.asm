@@ -43,6 +43,8 @@ cdscurr macro
 	endm
 
 ; r_s_xxx are display settings:
+; 32 - R2 DP
+; 16 - R1 DP
 ; 8 - R2 Sign Blink
 ; 4 - R1 Sign Blink
 ; 2 - R2 is Signed
@@ -100,7 +102,7 @@ sid_base equ cpld_regs_base_write + (%1101)
 
 spi_flash equ 1<<8
 spi_leds_left equ 2<<8
-spi_leds_right equ 4<<8
+;spi_leds_right equ 4<<8
 
 r_clr_keyrupt equ 1
 r_clr_trupt equ 2

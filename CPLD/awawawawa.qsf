@@ -121,3 +121,6 @@ set_global_assignment -name RESERVE_ALL_UNUSED_PINS "AS INPUT TRI-STATED WITH WE
 set_global_assignment -name ENABLE_DEVICE_WIDE_RESET ON
 set_location_assignment PIN_86 -to BODGE0
 set_location_assignment PIN_96 -to BODGE1
+set_location_assignment PIN_83 -to TEMP
+set_location_assignment PIN_91 -to SDA
+set_location_assignment PIN_90 -to SCL

@@ -1,0 +1,9 @@
+Program loop:
+    - Common maintenance tasks
+    - Run command input handler
+    - Run MM Code
+    - Run current command Code
+
+Timer Interrupt:
+    - Update displays according to display priority
+    - Increment and check watchdog timer

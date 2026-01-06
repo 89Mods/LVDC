@@ -9,6 +9,10 @@ mm0_entry:
 	CLA test
 	cdsspare
 	STO @curr_mm
+	CL
+	STO @r1_mm
+	STO @r2_mm
+	STO @r_s_mm
 	cdscurr
 ret:
 	cdscurr
