@@ -14,7 +14,7 @@ Infact, I took the most liberties with the IO Card, which contains various moder
 
 The most significant addition is that of a front panel (the original LVDC was an embedded device with no user interface) which is a bit like a DSKY, but stripped down and only capable of displaying in hexadecimal. The panel is optional. I can be safely removed and the computer used as a true embedded device.
 
-Software wise, things are still WiP. Two ROMs provide just enough storage for a small bootloader to initialize the entire SRAM from a flash IC. Sadly, core memory is far too bulky and expensive, so this will have to do. Eventually, I wish to write a mini-OS for this that allows a user to control the computer by typing in commands consisting of a Noun and Verb into the keypad.
+Software wise, things are still WiP. Two ROMs provide just enough storage for a small bootloader to initialize the entire SRAM from a flash IC. Sadly, core memory is far too bulky and expensive, so this will have to do. I created a mini-OS for this system that allows a user to control the computer by typing in commands consisting of a Noun and Verb into the keypad.
 
 **Known Issues:**
   - The HOP Save feature is bugged. The Instruction Pointer in the stored value is off by one. Trying to return with it will return execution to the transfer or HOP instruction that started the subroutine call, not the one following it, triggering an infinite loop. Fixed for now in software by modifying the saved value before return.
@@ -35,4 +35,4 @@ Software wise, things are still WiP. Two ROMs provide just enough storage for a 
 
 `behavioral` contains a Behavioral Verilog model of the LVDC I used as a starting point. It is incredibly inaccurate as I have not updated it in same time.
 
-`Programs` contains the software I’m writing for this computer. Currently just the Bootloader source and the WiP mini-OS mentioned earlier.
+`Programs` contains the software I’m writing for this computer. Currently just the Bootloader source and the WiP mini-OS mentioned earlier. [My fork of the AS Macroassembler](https://github.com/AvalonSemiconductors/asl-avalonsemi/) has support for the LVDC, and this is used to assemble all LVDC code in this directory.
